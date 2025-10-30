@@ -5,5 +5,10 @@ pub use effects::softclip::SoftClip;
 
 #[wasm_bindgen]
 pub fn dsp_version() -> String {
-    "fluexgl_dsp_wasm 0.1.0".into()
+    "fluexgl-dsp-wasm 0.1.0".into()
+}
+
+#[wasm_bindgen]
+pub fn os_version() -> String {
+    "Unknown".into()
 }
