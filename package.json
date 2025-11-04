@@ -25,5 +25,13 @@
     "bugs": {
         "url": "https://github.com/rohankanhaisingh/FluexGL-DSP-WebAssembly/issues"
     },
-    "homepage": "https://github.com/rohankanhaisingh/FluexGL-DSP-WebAssembly#readme"
+    "homepage": "https://github.com/rohankanhaisingh/FluexGL-DSP-WebAssembly#readme",
+    "dependencies": {
+        "@types/node": "^24.10.0",
+        "@typescript-eslint/eslint-plugin": "^8.46.3",
+        "@typescript-eslint/parser": "^8.46.3",
+        "eslint": "^9.39.1",
+        "ts-loader": "^9.5.4",
+        "typescript": "^5.9.3"
+    }
 }
