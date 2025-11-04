@@ -33,7 +33,9 @@
         "@typescript-eslint/eslint-plugin": "^8.46.3",
         "@typescript-eslint/parser": "^8.46.3",
         "eslint": "^9.39.1",
-        "text-decoder": "^1.2.3"
+        "html-minimizer-webpack-plugin": "^5.0.3",
+        "text-decoder": "^1.2.3",
+        "text-decoding": "^1.0.0"
     },
     "devDependencies": {
         "ts-loader": "^9.5.4",

@@ -10,6 +10,8 @@ export class SoftClipProcessor extends AudioWorkletProcessor {
 
         if (!options?.processorOptions?.module) throw new Error("Could not construct AudioWorkletProcessor instance, because the required WASM module has not been provided.");
 
+        console.log(options.processorOptions)
+
         const self = this;
 
         wasm_bindgen({ module: options.processorOptions?.module }).then(function () {

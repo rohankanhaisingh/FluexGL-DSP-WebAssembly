@@ -1,5 +1,7 @@
-import * as path from "path";
-import * as fs from "fs";
+import path from "path";
+import fs from "fs";
+import HtmlMinimizerPlugin from "html-minimizer-webpack-plugin";
+
 import type { Configuration } from "webpack";
 
 const rootDir: string = path.join(__dirname),
@@ -52,7 +54,15 @@ const config: Configuration = {
             },
         ],
     },
-    devtool: "source-map",
+    devtool: false,
+    optimization: {
+        splitChunks: false,          // geen extra vendor/runtime chunks
+        runtimeChunk: false,
+        minimize: true,
+        minimizer: [
+            new HtmlMinimizerPlugin()
+        ]
+    }
 };
 
 export default config;
