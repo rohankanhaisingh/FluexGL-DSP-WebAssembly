@@ -9,7 +9,7 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "wasm:dev": "sh -c 'cd lib/wasm && wasm-pack build --dev --target web --out-dir ../_dist/wasm --out-name fluexgl-dsp-wasm'",
-        "watch:wasm": "sh -c 'cd lib/wasm && cargo watch -w src -s \"wasm-pack build --dev --target web --out-dir ../_dist/wasm --out-name fluexgl-dsp-wasm\"'",
+        "watch:wasm": "sh -c 'cd lib && cargo watch -w src -s \"wasm-pack build --dev --target web --out-dir ../_dist/wasm --out-name fluexgl-dsp-wasm\"'",
         "ps-watch:wasm": "powershell -Command \"cd lib; cargo watch -w src -s 'wasm-pack build --dev --target web --out-dir ../_dist/ --out-name fluexgl-dsp-wasm'\"",
         "dev": "concurrently -n WEB,RUST -c \"npm:watch:wasm\"",
         "wasm:rel": "sh -c 'cd lib/wasm && wasm-pack build --release --target web --out-dir ../_dist/wasm --out-name fluexgl-dsp-wasm'",
