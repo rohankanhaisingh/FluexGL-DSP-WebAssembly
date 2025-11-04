@@ -1,17 +1,18 @@
-import { SoftClip, initSync } from "../../_dist/wasm/fluexgl-dsp-wasm";
-import { AudioWorkletProcessor, type AudioWorkletNodeOptions } from "./typings";
+import init, { SoftClip } from "@wasm/dist";
 
-class SoftClipProcessor extends AudioWorkletProcessor {
+const self = null;
+
+export class SoftClipProcessor extends AudioWorkletProcessor {
 
     public softClip: SoftClip | null = null;
     public drive: number = 0;
 
-    constructor(options: AudioWorkletNodeOptions) {
-        super();
+    constructor(options?: AudioWorkletNodeOptions) {
+        super(options);
 
-        if (!options.processorOptions?.module) throw new Error("Could not construct AudioWorkletProcessor instance, because the required WASM module has not been provided.");
+        if (!options?.processorOptions?.module) throw new Error("Could not construct AudioWorkletProcessor instance, because the required WASM module has not been provided.");
 
-        initSync({ module: options.processorOptions?.module })
+        init({ module: options.processorOptions?.module })
 
         this.softClip = new SoftClip(options.parameterData?.drive ?? 0)
     }
@@ -63,4 +64,4 @@ class SoftClipProcessor extends AudioWorkletProcessor {
     }
 }
 
-registerProcessor("SoftClipProcessor", SoftClipProcessor)
+registerProcessor("SoftClipProcessor", SoftClipProcessor);

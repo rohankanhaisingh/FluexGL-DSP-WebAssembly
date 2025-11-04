@@ -14,7 +14,9 @@
         "dev": "concurrently -n WEB,RUST -c \"npm:watch:wasm\"",
         "wasm:rel": "sh -c 'cd lib/wasm && wasm-pack build --release --target web --out-dir ../_dist/wasm --out-name fluexgl-dsp-wasm'",
         "wasm:opt": "sh -c 'wasm-opt -Oz -o lib/_dist/wasm/fluexgl-dsp-wasm.wasm lib/_dist/wasm/fluexgl-dsp-wasm.wasm'",
-        "build": "npm run wasm:rel && npm run wasm:opt"
+        "build": "npm run wasm:rel && npm run wasm:opt",
+        "webpack:build": "powershell ./scripts/BuildWebpackConfig.ps1",
+        "webpack:run": "npx webpack --config webpack.config.js"
     },
     "repository": {
         "type": "git",
@@ -30,8 +32,12 @@
         "@types/node": "^24.10.0",
         "@typescript-eslint/eslint-plugin": "^8.46.3",
         "@typescript-eslint/parser": "^8.46.3",
-        "eslint": "^9.39.1",
+        "eslint": "^9.39.1"
+    },
+    "devDependencies": {
         "ts-loader": "^9.5.4",
-        "typescript": "^5.9.3"
+        "typescript": "^5.9.3",
+        "webpack": "^5.102.1",
+        "webpack-cli": "^6.0.1"
     }
 }

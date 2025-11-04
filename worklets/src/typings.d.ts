@@ -1,5 +1,4 @@
 declare abstract class AudioWorkletProcessor {
-
     public readonly port: MessagePort;
     public static parameterDescriptors?: AudioParamDescriptor[];
 
@@ -8,7 +7,11 @@ declare abstract class AudioWorkletProcessor {
 
     constructor(options?: AudioWorkletNodeOptions);
 
-    public process(inputs: Float32Array[][], outputs: Float32Array[][], parameters: any): boolean;
+    public process(
+        inputs: Float32Array[][],
+        outputs: Float32Array[][],
+        parameters: any
+    ): boolean;
 }
 
 interface AudioWorkletNodeOptions extends AudioNodeOptions {
@@ -17,7 +20,7 @@ interface AudioWorkletNodeOptions extends AudioNodeOptions {
     outputChannelCount?: number[];
     parameterData?: Record<string, number>;
     processorOptions?: {
-        module: WebAssembly.Module
+        module: WebAssembly.Module;
     };
 }
 
@@ -26,21 +29,13 @@ interface AudioParamDescriptor {
     defaultValue?: number;
     minValue?: number;
     maxValue?: number;
-    automationRate?: "k-rate" | "a-rate";
 }
 
 interface AudioWorkletProcessorConstructor {
-    new (...args: any[]): AudioWorkletProcessor;
-    parameterDescriptors?: AudioParamDescriptor[];
+    new (options?: AudioWorkletNodeOptions): AudioWorkletProcessor;
 }
 
-declare global {
-    function registerProcessor(name: string, processorCtor: AudioWorkletProcessorConstructor): void;
-}
-
-export {
-    AudioWorkletProcessor,
-    type AudioParamDescriptor,
-    type AudioWorkletProcessorConstructor,
-    type AudioWorkletNodeOptions
-}
+declare function registerProcessor(
+    name: string,
+    processorCtor: AudioWorkletProcessorConstructor
+): void;
