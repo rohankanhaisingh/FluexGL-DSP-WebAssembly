@@ -1,6 +1,8 @@
 import path from "path";
 import fs from "fs";
+
 import HtmlMinimizerPlugin from "html-minimizer-webpack-plugin";
+import TerserPlugin from "terser-webpack-plugin";
 
 import type { Configuration } from "webpack";
 
@@ -56,11 +58,21 @@ const config: Configuration = {
     },
     devtool: false,
     optimization: {
-        splitChunks: false,          // geen extra vendor/runtime chunks
+        splitChunks: false,
         runtimeChunk: false,
         minimize: true,
         minimizer: [
-            new HtmlMinimizerPlugin()
+            new HtmlMinimizerPlugin(),
+            new TerserPlugin({
+                terserOptions: {
+                    mangle: {
+                        keep_fnames: true,
+                        reserved: ['wasm_bindgen']
+                    },
+                    keep_fnames: true,
+                    keep_classnames: true
+                },
+            }),
         ]
     }
 };

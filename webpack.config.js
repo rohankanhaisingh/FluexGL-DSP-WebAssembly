@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var path_1 = __importDefault(require("path"));
 var fs_1 = __importDefault(require("fs"));
 var html_minimizer_webpack_plugin_1 = __importDefault(require("html-minimizer-webpack-plugin"));
+var terser_webpack_plugin_1 = __importDefault(require("terser-webpack-plugin"));
 var rootDir = path_1.default.join(__dirname), workletsDirectoryPath = path_1.default.join(rootDir, "worklets"), workletsSourceDirectoryPath = path_1.default.join(workletsDirectoryPath, "src"), workletsDistDirectoryPath = path_1.default.join(workletsDirectoryPath, "_dist");
 var webAssemblyDistDirectoryPath = path_1.default.join(rootDir, "_dist");
 var entryFileMap = {};
@@ -48,11 +49,21 @@ var config = {
     },
     devtool: false,
     optimization: {
-        splitChunks: false, // geen extra vendor/runtime chunks
+        splitChunks: false,
         runtimeChunk: false,
         minimize: true,
         minimizer: [
-            new html_minimizer_webpack_plugin_1.default()
+            new html_minimizer_webpack_plugin_1.default(),
+            new terser_webpack_plugin_1.default({
+                terserOptions: {
+                    mangle: {
+                        keep_fnames: true,
+                        reserved: ['wasm_bindgen']
+                    },
+                    keep_fnames: true,
+                    keep_classnames: true
+                },
+            }),
         ]
     }
 };

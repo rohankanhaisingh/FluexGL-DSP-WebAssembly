@@ -34,6 +34,7 @@
         "@typescript-eslint/parser": "^8.46.3",
         "eslint": "^9.39.1",
         "html-minimizer-webpack-plugin": "^5.0.3",
+        "terser-webpack-plugin": "^5.3.14",
         "text-decoder": "^1.2.3",
         "text-decoding": "^1.0.0"
     },
