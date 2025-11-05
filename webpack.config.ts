@@ -5,8 +5,7 @@ import type { Configuration } from "webpack";
 
 const rootDir: string = path.join(__dirname),
     workletsDirectoryPath: string = path.join(rootDir, "worklets"),
-    workletsSourceDirectoryPath: string = path.join(workletsDirectoryPath, "src"),
-    workletsDistDirectoryPath: string = path.join(workletsDirectoryPath, "_dist");
+    workletsSourceDirectoryPath: string = path.join(workletsDirectoryPath, "src");
 
 const webAssemblyDistDirectoryPath: string = path.join(rootDir, "_dist");
 
@@ -14,10 +13,10 @@ const config: Configuration = {
     mode: "production",
     target: "webworker",
     entry: {
-        "FluexGL-DSP-Processors": path.join(workletsSourceDirectoryPath, "exports.ts")
+        "fluexgl-dsp-processor": path.join(workletsSourceDirectoryPath, "exports.ts")
     },
     output: {
-        path: workletsDistDirectoryPath,
+        path: webAssemblyDistDirectoryPath,
         filename: "[name].worklet",
         clean: true,
         publicPath: "",

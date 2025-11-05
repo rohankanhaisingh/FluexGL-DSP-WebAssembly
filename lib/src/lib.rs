@@ -1,7 +1,9 @@
 use wasm_bindgen::prelude::*;
 
 mod effects;
+
 pub use effects::softclip::SoftClip;
+pub use effects::filter::OnePoleLowPass;
 
 #[wasm_bindgen]
 pub fn dsp_version() -> String {
