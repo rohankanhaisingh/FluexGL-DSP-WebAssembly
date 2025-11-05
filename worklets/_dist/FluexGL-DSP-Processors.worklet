@@ -18,8 +18,6 @@
 /******/ 	
 /************************************************************************/
 
-// UNUSED EXPORTS: SoftClipProcessor
-
 ;// ./node_modules/text-decoding/src/utils.js
 //
 // Utilities
@@ -3201,7 +3199,7 @@ class TextDecoder {
 
 ;// ./_dist/fluexgl-dsp-wasm.js
 
-let fluexgl_dsp_wasm_wasm_bindgen;
+let wasm_bindgen;
 (function() {
     const __exports = {};
     let script_src;
@@ -3456,23 +3454,19 @@ let fluexgl_dsp_wasm_wasm_bindgen;
         return __wbg_finalize_init(instance, module);
     }
 
-    fluexgl_dsp_wasm_wasm_bindgen = Object.assign(__wbg_init, { initSync }, __exports);
-
+    wasm_bindgen = Object.assign(__wbg_init, { initSync }, __exports);
+    if(typeof AudioWorkletProcessor !== "undefined") {
+        AudioWorkletProcessor.wasm = wasm_bindgen;
+    }
 })();
-
-;// ./worklets/src/SoftClipProcessor.worklet.ts
-
+;// ./worklets/src/worklets/SoftClipProcessor.worklet.ts
 class SoftClipProcessor extends AudioWorkletProcessor {
     softClip = null;
     drive = 0;
     constructor(options) {
         super(options);
-        if (!options?.processorOptions?.module)
-            throw new Error("Could not construct AudioWorkletProcessor instance, because the required WASM module has not been provided.");
-        console.log(options.processorOptions);
-        const self = this;
-        wasm_bindgen({ module: options.processorOptions?.module }).then(function () {
-            self.softClip = new wasm_bindgen.SoftClip(options.parameterData?.drive ?? 0);
+        AudioWorkletProcessor.wasm({ module: options.processorOptions.module }).then(() => {
+            this.softClip = new AudioWorkletProcessor.wasm.SoftClip(options.parameterData?.drive ?? 0);
         });
     }
     process(inputs, outputs, parameters) {
@@ -3509,7 +3503,29 @@ class SoftClipProcessor extends AudioWorkletProcessor {
         return true;
     }
 }
+
+;// ./worklets/src/worklets/WhiteNoiseProcessor.worklet.ts
+class WhiteNoiseProcessor extends AudioWorkletProcessor {
+    constructor(options) {
+        super(options);
+    }
+    process(inputs, outputs, parameters) {
+        const output = outputs[0];
+        output.forEach((channel) => {
+            for (let i = 0; i < channel.length; i++) {
+                channel[i] = Math.random() * 2 - 1;
+            }
+        });
+        return true;
+    }
+}
+
+;// ./worklets/src/exports.ts
+
+
+
 registerProcessor("SoftClipProcessor", SoftClipProcessor);
+registerProcessor("WhiteNoiseProcessor", WhiteNoiseProcessor);
 
 /******/ })()
 ;

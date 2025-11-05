@@ -1,22 +1,14 @@
-import "../../_dist/fluexgl-dsp-wasm.js";
-
-export class SoftClipProcessor extends AudioWorkletProcessor {
+export default class SoftClipProcessor extends AudioWorkletProcessor {
 
     public softClip: wasm_bindgen.SoftClip | null = null;
     public drive: number = 0;
 
-    constructor(options?: AudioWorkletNodeOptions) {
+    constructor(options: AudioWorkletNodeOptions) {
+        
         super(options);
 
-        if (!options?.processorOptions?.module) throw new Error("Could not construct AudioWorkletProcessor instance, because the required WASM module has not been provided.");
-
-        console.log(options.processorOptions)
-
-        const self = this;
-
-        wasm_bindgen({ module: options.processorOptions?.module }).then(function () {
-
-            self.softClip = new wasm_bindgen.SoftClip(options.parameterData?.drive ?? 0);
+        AudioWorkletProcessor.wasm({ module: options.processorOptions.module }).then(() => {
+            this.softClip = new AudioWorkletProcessor.wasm.SoftClip(options.parameterData?.drive ?? 0);
         });
     }
 
@@ -66,5 +58,3 @@ export class SoftClipProcessor extends AudioWorkletProcessor {
         return true;
     }
 }
-
-registerProcessor("SoftClipProcessor", SoftClipProcessor);

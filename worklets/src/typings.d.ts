@@ -1,6 +1,8 @@
 declare abstract class AudioWorkletProcessor {
     public readonly port: MessagePort;
+
     public static parameterDescriptors?: AudioParamDescriptor[];
+    public static wasm: wasm_bindgen;
 
     protected isReady: boolean;
     protected module: WebAssembly.Module | null;
@@ -32,7 +34,7 @@ interface AudioParamDescriptor {
 }
 
 interface AudioWorkletProcessorConstructor {
-    new (options?: AudioWorkletNodeOptions): AudioWorkletProcessor;
+    new (options: AudioWorkletNodeOptions): AudioWorkletProcessor;
 }
 
 declare function registerProcessor(

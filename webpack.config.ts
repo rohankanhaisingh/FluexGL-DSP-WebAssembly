@@ -1,9 +1,6 @@
 import path from "path";
-import fs from "fs";
 
-import HtmlMinimizerPlugin from "html-minimizer-webpack-plugin";
 import TerserPlugin from "terser-webpack-plugin";
-
 import type { Configuration } from "webpack";
 
 const rootDir: string = path.join(__dirname),
@@ -13,26 +10,11 @@ const rootDir: string = path.join(__dirname),
 
 const webAssemblyDistDirectoryPath: string = path.join(rootDir, "_dist");
 
-const entryFileMap: { [K: string]: string } = {};
-
-const workletFiles = fs.readdirSync(workletsSourceDirectoryPath).filter(function (fileName: string) {
-    return fileName ? fileName.endsWith("worklet.ts") : null;
-});
-
-workletFiles.forEach((workletFile: string) => {
-    const initialWorkletName: string = workletFile.substring(0, workletFile.indexOf(".worklet.ts"));
-
-    entryFileMap[initialWorkletName] = path.join(workletsSourceDirectoryPath, workletFile);
-});
-
-if (Object.keys(entryFileMap).length === 0)
-    throw new Error(`Geen .worklet.ts bestanden gevonden in: ${workletsSourceDirectoryPath}`);
-
 const config: Configuration = {
     mode: "production",
     target: "webworker",
     entry: {
-        "SoftClipProcessor": path.join(workletsSourceDirectoryPath, "SoftClipProcessor.worklet.ts")
+        "FluexGL-DSP-Processors": path.join(workletsSourceDirectoryPath, "exports.ts")
     },
     output: {
         path: workletsDistDirectoryPath,
@@ -56,25 +38,24 @@ const config: Configuration = {
             },
         ],
     },
-    devtool: false,
+    devtool: "source-map",
     optimization: {
         splitChunks: false,
         runtimeChunk: false,
         minimize: true,
         minimizer: [
-            new HtmlMinimizerPlugin(),
             new TerserPlugin({
+                exclude: path.join(webAssemblyDistDirectoryPath, "fluexgl-dsp-wasm.js"),
                 terserOptions: {
                     mangle: {
-                        keep_fnames: true,
-                        reserved: ['wasm_bindgen']
-                    },
-                    keep_fnames: true,
-                    keep_classnames: true
-                },
+                        reserved: ["wasm_bindgen"]
+                    }
+                }
             }),
         ]
     }
 };
+
+console.log(true);
 
 export default config;
