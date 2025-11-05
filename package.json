@@ -8,7 +8,7 @@
     },
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "wasm:dev:shell": "cd scripts && ./build-wasm.sh",
+        "web-assembly:build:shell": "cd scripts && ./build-wasm.sh",
         "watch:wasm:shell": "cd scripts && ./watch-wasm.sh",
         "watch:wasm:powershell": "powershell -Command \"cd lib; cargo watch -w src -s 'wasm-pack build --dev --target web --out-dir ../_dist/ --out-name fluexgl-dsp-wasm'\"",
         "dev": "concurrently -n WEB,RUST -c \"npm:watch:wasm\"",
