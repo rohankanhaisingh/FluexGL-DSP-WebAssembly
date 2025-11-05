@@ -1,6 +1,6 @@
 import path from "path";
 
-import TerserPlugin from "terser-webpack-plugin";
+import HtmlMinimizerPlugin from "html-minimizer-webpack-plugin";
 import type { Configuration } from "webpack";
 
 const rootDir: string = path.join(__dirname),
@@ -18,7 +18,6 @@ const config: Configuration = {
     output: {
         path: webAssemblyDistDirectoryPath,
         filename: "[name].worklet",
-        clean: true,
         publicPath: "",
         globalObject: "globalThis"
     },
@@ -43,18 +42,9 @@ const config: Configuration = {
         runtimeChunk: false,
         minimize: true,
         minimizer: [
-            new TerserPlugin({
-                exclude: path.join(webAssemblyDistDirectoryPath, "fluexgl-dsp-wasm.js"),
-                terserOptions: {
-                    mangle: {
-                        reserved: ["wasm_bindgen"]
-                    }
-                }
-            }),
+            new HtmlMinimizerPlugin()
         ]
     }
 };
-
-console.log(true);
 
 export default config;

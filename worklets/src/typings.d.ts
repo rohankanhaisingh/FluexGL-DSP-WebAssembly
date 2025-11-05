@@ -37,6 +37,11 @@ interface AudioWorkletProcessorConstructor {
     new (options: AudioWorkletNodeOptions): AudioWorkletProcessor;
 }
 
+interface MessagePortEventData {
+    type: string;
+    value: any;
+}
+
 declare function registerProcessor(
     name: string,
     processorCtor: AudioWorkletProcessorConstructor
