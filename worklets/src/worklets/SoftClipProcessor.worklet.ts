@@ -7,7 +7,7 @@ export default class SoftClipProcessor extends AudioWorkletProcessor {
         
         super(options);
 
-        AudioWorkletProcessor.wasm({ module: options.processorOptions.module }).then(() => {
+        AudioWorkletProcessor.wasm(options.processorOptions.module).then(() => {
             this.softClip = new AudioWorkletProcessor.wasm.SoftClip(options.parameterData?.drive ?? 0);
         });
     }
