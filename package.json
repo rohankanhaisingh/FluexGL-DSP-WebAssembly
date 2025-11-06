@@ -12,6 +12,7 @@
         "sh:web-assembly:watch": "cd scripts && ./watch-wasm.sh",
         "sh:webpack:run": "npx webpack --config webpack.config.js",
         "sh:webpack:build": "cd scripts && ./build-webpack-config.sh && cd ../",
+        "ps:web-assembly:build": "powershell ./scripts/BuildWasm.ps1",
         "ps:web-assembly:watch": "powershell -Command \"cd lib; cargo watch -w src -s 'wasm-pack build --dev --target web --out-dir ../_dist/ --out-name fluexgl-dsp-wasm'\"",
         "ps:webpack:build:": "powershell ./scripts/BuildWebpackConfig.ps1",
         "dev": "concurrently -n WEB,RUST -c \"npm:watch:wasm\"",
