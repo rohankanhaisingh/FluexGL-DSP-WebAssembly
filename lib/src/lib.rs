@@ -4,6 +4,7 @@ mod effects;
 
 pub use effects::softclip::SoftClip;
 pub use effects::filter::OnePoleLowPass;
+pub use effects::chorus::Chorus;
 
 #[wasm_bindgen]
 pub fn dsp_version() -> String {

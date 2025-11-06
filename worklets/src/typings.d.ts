@@ -46,3 +46,6 @@ declare function registerProcessor(
     name: string,
     processorCtor: AudioWorkletProcessorConstructor
 ): void;
+
+// AudioWorkletGlobalScope provides a global sampleRate constant
+declare const sampleRate: number;

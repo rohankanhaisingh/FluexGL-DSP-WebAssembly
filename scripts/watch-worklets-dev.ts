@@ -18,7 +18,9 @@ const rootPath: string = path.join(__dirname, "..");
 const workletsSourceFolderPath: string = path.join(rootPath, "worklets", "src");
 const testApplicationFolderPath: string = path.join(rootPath, "..", "FluexGL-TestApplication");
 
-if (!fs.existsSync(workletsSourceFolderPath) || !fs.existsSync(testApplicationFolderPath)) {
+const generatedWasmFilePath: string = path.join(rootPath, "_dist", "fluexgl-dsp-wasm_bg.wasm");
+
+if (!fs.existsSync(workletsSourceFolderPath) || !fs.existsSync(testApplicationFolderPath) || !fs.existsSync(generatedWasmFilePath)) {
     throw new Error(
         "Cannot watch for file changes because one or more specified folders do not exist."
     );
@@ -42,8 +44,16 @@ const files: string[] = globSync("**/*.ts", {
     cwd: workletsSourceFolderPath
 });
 
-files.forEach((relativeFilePath: string) => {
+fs.watchFile(generatedWasmFilePath, { interval: 100 }, (current: fs.Stats, previous: fs.Stats) => {
+    if (current.mtimeMs !== previous.mtimeMs) {
+        runDevelopmentPipeline().catch((err) => {
+            console.error(colors.red("Error while running development pipeline:"));
+            console.error(err);
+        });
+    }
+});
 
+files.forEach((relativeFilePath: string) => {
     const fullFilePath: string = path.join(workletsSourceFolderPath, relativeFilePath);
 
     fs.watchFile(fullFilePath, { interval: 100 }, (current: fs.Stats, previous: fs.Stats) => {
@@ -78,17 +88,11 @@ async function runDevelopmentPipeline(): Promise<void> {
         throw new Error("Could not copy the generated worklet file because it does not exist.");
     }
 
-    const copyDestinationPath: string = path.join(
-        testApplicationAssetsDataFolderPath,
-        "fluexgl-dsp-processor.worklet"
-    );
+    const workletCopyDestinationPath: string = path.join(testApplicationAssetsDataFolderPath, "fluexgl-dsp-processor.worklet");
+    const wasmCopyDestinationPath: string = path.join(testApplicationAssetsDataFolderPath, "fluexgl-dsp-wasm_bg.wasm");
 
-    console.log(copyDestinationPath);
-
-    fs.copyFileSync(
-        generatedWorkletFilePath,
-        copyDestinationPath
-    );
+    fs.copyFileSync(generatedWorkletFilePath, workletCopyDestinationPath);
+    fs.copyFileSync(generatedWasmFilePath, wasmCopyDestinationPath);
 
     const difference: number = Date.now() - start;
 
