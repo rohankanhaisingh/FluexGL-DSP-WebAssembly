@@ -1,11 +1,12 @@
 export default class SoftClipProcessor extends AudioWorkletProcessor {
 
     public softClip: wasm_bindgen.SoftClip | null = null;
-    public drive: number = 0;
+    public drive: number = 1;
 
     constructor(options: AudioWorkletNodeOptions) {
-        
         super(options);
+
+        this.drive = options.parameterData?.drive ?? 1
 
         this.port.addEventListener("message", (event: MessageEvent) => {
             
@@ -18,6 +19,7 @@ export default class SoftClipProcessor extends AudioWorkletProcessor {
         });
 
         AudioWorkletProcessor.wasm(options.processorOptions.module).then(() => {
+            this.isReady = true;
             this.softClip = new AudioWorkletProcessor.wasm.SoftClip(options.parameterData?.drive ?? 0);
         });
     }

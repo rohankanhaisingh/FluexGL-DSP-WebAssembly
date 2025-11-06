@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Resolve the project's root directory
-projectRootDirectory="$(dirname "$(realpath "$0")")/.."
+projectRootDirectory="$(dirname "$(realpath "$0")")/..../"
 
 # Resolve the Webpack configuration file path
 webpackConfigurationFile="$projectRootDirectory/webpack.config.ts"

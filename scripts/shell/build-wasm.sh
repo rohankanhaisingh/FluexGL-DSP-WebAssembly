@@ -2,7 +2,7 @@
 set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROOT_PATH="$(realpath "${SCRIPT_DIR}/..")"
+ROOT_PATH="$(realpath "${SCRIPT_DIR}/../../")"
 LIB_PATH="${ROOT_PATH}/lib"
 DIST_PATH="${ROOT_PATH}/_dist"
 SCRIPTS_PATH="${ROOT_PATH}/scripts"

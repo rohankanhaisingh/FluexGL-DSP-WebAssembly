@@ -1,5 +1,5 @@
 # Resolves the project's root directory,
-$projectRootDirectory = Join-Path -Path $PSScriptRoot -ChildPath "../";
+$projectRootDirectory = Join-Path -Path $PSScriptRoot -ChildPath "../../";
 
 # Resolves the Webpack configuration file path.
 $webpackConfigurationFile = Join-Path -Path $projectRootDirectory -ChildPath "webpack.config.ts";

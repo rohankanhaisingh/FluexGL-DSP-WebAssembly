@@ -2,7 +2,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 try {
-    $rootPath = Resolve-Path (Join-Path -Path $PSScriptRoot -ChildPath '..')
+    $rootPath = Resolve-Path (Join-Path -Path $PSScriptRoot -ChildPath '../../')
 
     $wasmLibPath = Join-Path -Path $rootPath -ChildPath 'lib'
     $distPath = Join-Path -Path $rootPath -ChildPath '_dist'
