@@ -1,32 +1,55 @@
-/**
- * This script post processes the generated 'fluexgl-dsp-wasm.js' file, so webpack
- * can easily import the 
- */
-
 const fs = require("fs");
 const path = require("path");
+const colors = require("colors");
+const cp = require("child_process");
 
-const rootPath = path.join(__dirname, "../");
-const webAssemblyDistDirectoryPath = path.join(rootPath, "_dist");
+(async function () {
 
-const webAssemblyGeneratedJavascriptFile = path.join(webAssemblyDistDirectoryPath, "fluexgl-dsp-wasm.js");
+    colors.enable();
 
-if(!fs.existsSync(webAssemblyGeneratedJavascriptFile)) {
-    console.error("Could not located generated fluexgl-dsp-wasm.js file.");
-    process.exit();
-}
+    const projectRootDirectory = path.join(__dirname, "../"),
+        projectDistDirectory = path.join(projectRootDirectory, "_dist");
 
-const fileContent = fs.readFileSync(webAssemblyGeneratedJavascriptFile, "utf8");
+    if (!fs.existsSync(projectDistDirectory))
+        return console.error("[ERROR]: " + "Could not post build wasm, because the _dist directory could not be located.");
 
-// The correct order of the post processed script.
-// Do NOT fuck with this lmfao.
-const newFileContent = [
-    `import { TextDecoder } from "text-decoding";`,
-    fileContent,
-    `if(typeof AudioWorkletProcessor !== "undefined") {AudioWorkletProcessor.wasm = wasm_bindgen;}`
-];
+    const distModuleFilePath = path.join(projectDistDirectory, "fluexgl-dsp-wasm.js"),
+        oldDistModuleFilePath = path.join(projectDistDirectory, "fluexgl-dsp.wasm.old.js");
 
-// Rewrite generated javascript file.
-fs.writeFileSync(webAssemblyGeneratedJavascriptFile, newFileContent.join("\n"), "utf-8");
+    if (!fs.existsSync(distModuleFilePath))
+        return console.error("[ERROR]: ".red + "Could not post build wasm, because the module could not be located.");
 
-console.log("Succesfully post processes generated WASM file.");
+    const moduleFileContent = fs.readFileSync(distModuleFilePath);
+
+    const newModuleFileContent = `
+        // This line has been generated from the 'post-build-wasm.js' script. \n
+        import { TextDecoder } from "text-decoding"; \n
+        ${moduleFileContent} \n
+        if(typeof AudioWorkletProcessor !== "undefined") {
+            AudioWorkletProcessor.wasm = wasm_bindgen;
+        }
+    `;
+
+    fs.writeFileSync(oldDistModuleFilePath, newModuleFileContent, "utf-8");
+    fs.writeFileSync(distModuleFilePath, newModuleFileContent, "utf-8");
+    console.log("[INFO]: ".yellow + "Succesfully added imports into generated javascript file. Now generating worklets...");
+
+    const webpackConfigFile = path.join(projectRootDirectory, "webpack.config.cjs");
+
+    if(!fs.existsSync(webpackConfigFile))
+        return console.log("[ERROR]: " + "Could not post build wasm module, because ")
+
+    async function internalThread() {
+        return new Promise(function(resolve, reject) {
+            cp.exec(`npx webpack --config ${webpackConfigFile}`, function(err, stdout, stderr) {
+
+                stdout && console.log(stdout);
+                stderr && console.log(stderr);
+            }).on("close", resolve);
+        })
+    }
+
+    await internalThread();
+
+    console.log("[SUCCES]: ".green + "Succesfully generated worklets. Post building wasm is now done, and ready for deployment.");
+})()

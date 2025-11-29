@@ -1,12 +1,15 @@
 export default class SoftClipProcessor extends AudioWorkletProcessor {
 
     public softClip: wasm_bindgen.SoftClip | null = null;
+
     public drive: number = 1;
+    public gain: number = 1;
 
     constructor(options: AudioWorkletNodeOptions) {
         super(options);
 
         this.drive = options.parameterData?.drive ?? 0;
+        this.gain = options.parameterData?.gain ?? 1;
 
         this.port.onmessage = (event: MessageEvent) => {
             
@@ -14,6 +17,7 @@ export default class SoftClipProcessor extends AudioWorkletProcessor {
 
             switch (data.type) {
                 case "set-drive": return this.setDrive(data.value);
+                case "set-gain": return this.setGain(data.value);
             }
         };
 
@@ -24,9 +28,13 @@ export default class SoftClipProcessor extends AudioWorkletProcessor {
     }
 
     private setDrive(drive: number = 0) {
-
         this.softClip?.set_drive(drive);
         this.drive = drive;
+    }
+
+    private setGain(gain: number = 1) {
+        this.softClip?.set_gain(gain);
+        this.gain = gain;
     }
 
     public process(inputs: Float32Array[][], outputs: Float32Array[][], parameters: any): boolean {
