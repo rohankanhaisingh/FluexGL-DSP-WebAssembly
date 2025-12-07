@@ -197,6 +197,79 @@
 
     __exports.Chorus = Chorus;
 
+    const HardClipFinalization = (typeof FinalizationRegistry === 'undefined')
+        ? { register: () => {}, unregister: () => {} }
+        : new FinalizationRegistry(ptr => wasm.__wbg_hardclip_free(ptr >>> 0, 1));
+
+    class HardClip {
+
+        static __wrap(ptr) {
+            ptr = ptr >>> 0;
+            const obj = Object.create(HardClip.prototype);
+            obj.__wbg_ptr = ptr;
+            HardClipFinalization.register(obj, obj.__wbg_ptr, obj);
+            return obj;
+        }
+
+        __destroy_into_raw() {
+            const ptr = this.__wbg_ptr;
+            this.__wbg_ptr = 0;
+            HardClipFinalization.unregister(this);
+            return ptr;
+        }
+
+        free() {
+            const ptr = this.__destroy_into_raw();
+            wasm.__wbg_hardclip_free(ptr, 0);
+        }
+        /**
+         * @param {number} drive
+         * @param {number} gain
+         * @returns {HardClip}
+         */
+        static new(drive, gain) {
+            const ret = wasm.hardclip_new(drive, gain);
+            return HardClip.__wrap(ret);
+        }
+        /**
+         * @param {Float32Array} buffer
+         */
+        process(buffer) {
+            var ptr0 = passArrayF32ToWasm0(buffer, wasm.__wbindgen_malloc);
+            var len0 = WASM_VECTOR_LEN;
+            wasm.hardclip_process(this.__wbg_ptr, ptr0, len0, buffer);
+        }
+        /**
+         * @returns {number}
+         */
+        get_gain() {
+            const ret = wasm.hardclip_get_gain(this.__wbg_ptr);
+            return ret;
+        }
+        /**
+         * @param {number} gain
+         */
+        set_gain(gain) {
+            wasm.hardclip_set_gain(this.__wbg_ptr, gain);
+        }
+        /**
+         * @returns {number}
+         */
+        get_drive() {
+            const ret = wasm.hardclip_get_drive(this.__wbg_ptr);
+            return ret;
+        }
+        /**
+         * @param {number} drive
+         */
+        set_drive(drive) {
+            wasm.hardclip_set_drive(this.__wbg_ptr, drive);
+        }
+    }
+    if (Symbol.dispose) HardClip.prototype[Symbol.dispose] = HardClip.prototype.free;
+
+    __exports.HardClip = HardClip;
+
     const OnePoleLowPassFinalization = (typeof FinalizationRegistry === 'undefined')
         ? { register: () => {}, unregister: () => {} }
         : new FinalizationRegistry(ptr => wasm.__wbg_onepolelowpass_free(ptr >>> 0, 1));
@@ -265,7 +338,7 @@
          * @param {number} gain
          */
         constructor(drive, gain) {
-            const ret = wasm.softclip_new(drive, gain);
+            const ret = wasm.hardclip_new(drive, gain);
             this.__wbg_ptr = ret >>> 0;
             SoftClipFinalization.register(this, this.__wbg_ptr, this);
             return this;
@@ -282,27 +355,27 @@
          * @returns {number}
          */
         get_gain() {
-            const ret = wasm.softclip_get_gain(this.__wbg_ptr);
+            const ret = wasm.hardclip_get_gain(this.__wbg_ptr);
             return ret;
         }
         /**
          * @param {number} gain
          */
         set_gain(gain) {
-            wasm.softclip_set_gain(this.__wbg_ptr, gain);
+            wasm.hardclip_set_gain(this.__wbg_ptr, gain);
         }
         /**
          * @returns {number}
          */
         get_drive() {
-            const ret = wasm.softclip_get_drive(this.__wbg_ptr);
+            const ret = wasm.hardclip_get_drive(this.__wbg_ptr);
             return ret;
         }
         /**
          * @param {number} drive
          */
         set_drive(drive) {
-            wasm.softclip_set_drive(this.__wbg_ptr, drive);
+            wasm.hardclip_set_drive(this.__wbg_ptr, drive);
         }
     }
     if (Symbol.dispose) SoftClip.prototype[Symbol.dispose] = SoftClip.prototype.free;

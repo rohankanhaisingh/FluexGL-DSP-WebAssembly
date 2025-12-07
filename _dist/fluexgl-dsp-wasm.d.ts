@@ -19,6 +19,17 @@ declare namespace wasm_bindgen {
 	  process(buffer: Float32Array): void;
 	  set_mix(mix: number): void;
 	}
+	export class HardClip {
+	  private constructor();
+	  free(): void;
+	  [Symbol.dispose](): void;
+	  static new(drive: number, gain: number): HardClip;
+	  process(buffer: Float32Array): void;
+	  get_gain(): number;
+	  set_gain(gain: number): void;
+	  get_drive(): number;
+	  set_drive(drive: number): void;
+	}
 	export class OnePoleLowPass {
 	  private constructor();
 	  free(): void;
@@ -44,7 +55,7 @@ declare type InitInput = RequestInfo | URL | Response | BufferSource | WebAssemb
 declare interface InitOutput {
   readonly memory: WebAssembly.Memory;
   readonly __wbg_chorus_free: (a: number, b: number) => void;
-  readonly __wbg_onepolelowpass_free: (a: number, b: number) => void;
+  readonly __wbg_hardclip_free: (a: number, b: number) => void;
   readonly chorus_get_base_delay_ms: (a: number) => number;
   readonly chorus_get_depth_ms: (a: number) => number;
   readonly chorus_get_feedback: (a: number) => number;
@@ -58,16 +69,23 @@ declare interface InitOutput {
   readonly chorus_set_mix: (a: number, b: number) => void;
   readonly chorus_set_rate_hz: (a: number, b: number) => void;
   readonly dsp_version: () => [number, number];
+  readonly hardclip_get_drive: (a: number) => number;
+  readonly hardclip_get_gain: (a: number) => number;
+  readonly hardclip_new: (a: number, b: number) => number;
+  readonly hardclip_process: (a: number, b: number, c: number, d: any) => void;
+  readonly hardclip_set_drive: (a: number, b: number) => void;
+  readonly hardclip_set_gain: (a: number, b: number) => void;
   readonly onepolelowpass_new: (a: number, b: number) => number;
   readonly onepolelowpass_set_cutoff: (a: number, b: number, c: number) => void;
   readonly os_version: () => [number, number];
-  readonly softclip_get_drive: (a: number) => number;
-  readonly softclip_get_gain: (a: number) => number;
-  readonly softclip_new: (a: number, b: number) => number;
   readonly softclip_process: (a: number, b: number, c: number, d: any) => void;
-  readonly softclip_set_drive: (a: number, b: number) => void;
-  readonly softclip_set_gain: (a: number, b: number) => void;
+  readonly softclip_new: (a: number, b: number) => number;
+  readonly __wbg_onepolelowpass_free: (a: number, b: number) => void;
   readonly __wbg_softclip_free: (a: number, b: number) => void;
+  readonly softclip_get_gain: (a: number) => number;
+  readonly softclip_get_drive: (a: number) => number;
+  readonly softclip_set_gain: (a: number, b: number) => void;
+  readonly softclip_set_drive: (a: number, b: number) => void;
   readonly __wbindgen_externrefs: WebAssembly.Table;
   readonly __wbindgen_free: (a: number, b: number, c: number) => void;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
