@@ -41,8 +41,9 @@ export default class HardClipProcessor extends AudioWorkletProcessor {
         this.gain = gain;
     }
 
-    private processChannel(channel: Float32Array, channelIndex: number): void {
-        this.hardClip?.process(channel);
+    private processChannel(channel: Float32Array | null | undefined, channelIndex: number): void {
+        (channel && this.hardClip) 
+            && this.hardClip.process(channel);
     }
 
     public process(inputs: Float32Array[][], outputs: Float32Array[][], parameters: any): boolean {
@@ -52,7 +53,7 @@ export default class HardClipProcessor extends AudioWorkletProcessor {
             return true;
         }
 
-        processChannels(inputs, outputs, this.processChannel.bind(this));
+        // processChannels(inputs, outputs, this.processChannel.bind(this));
 
         return true;
     }

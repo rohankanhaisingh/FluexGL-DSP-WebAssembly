@@ -1,12 +1,3 @@
-/**
- * Low pass filter. 
- * 
- * This filter is a very basic filter
- * passing only low frequencies through.
- * The roll-off is set to 6 dB, which is the natural
- * way of filters.
- */
-
 use std::f32::consts::PI;
 use wasm_bindgen::prelude::*;
 
@@ -14,24 +5,27 @@ use wasm_bindgen::prelude::*;
 pub struct LowPass {
     sample_rate: f32,
     cutoff: f32,
-    alpha: f32,
     min_freq: f32,
+    a0: f32,
+    b1: f32,
     z1: f32,
 }
 
 #[wasm_bindgen]
 impl LowPass {
+    #[wasm_bindgen(constructor)]
     pub fn new(sample_rate: f32, cutoff: f32) -> LowPass {
-        let mut low_pass_filter: LowPass = LowPass {
+        let mut lp = LowPass {
             sample_rate,
             cutoff,
-            alpha: 0.0,
             min_freq: 10.0,
+            a0: 0.0,
+            b1: 0.0,
             z1: 0.0,
         };
 
-        low_pass_filter.update_coefficients();
-        low_pass_filter
+        lp.update_coefficients();
+        lp
     }
 
     pub fn set_cutoff(&mut self, cutoff: f32) {
@@ -47,41 +41,44 @@ impl LowPass {
     pub fn set_sample_rate(&mut self, sample_rate: f32) {
         self.sample_rate = sample_rate;
         self.update_coefficients();
-    }  
+    }
 
     pub fn reset(&mut self) {
         self.z1 = 0.0;
     }
 
     fn update_coefficients(&mut self) {
-        let mut fc: f32 = self.cutoff;
+        let mut fc = self.cutoff;
 
         if fc < self.min_freq {
             fc = self.min_freq;
         }
 
-        if fc > self.sample_rate * 0.45 {
-            fc = self.sample_rate * 0.45;
+        let nyquist = self.sample_rate * 0.5;
+        if fc > nyquist {
+            fc = nyquist;
         }
 
-        let omega: f32 = 2.0 * PI * fc;
+        // 1-pole low-pass: y[n] = a0 * x[n] + b1 * y[n-1]
+        // x = e^(-2π fc / fs)
+        let x = (-2.0 * PI * fc / self.sample_rate).exp();
 
-        self.alpha = omega / (omega + self.sample_rate);
+        self.a0 = 1.0 - x;
+        self.b1 = x;
     }
 
     pub fn process(&mut self, buffer: &mut [f32]) {
-        let mut y_previous: f32 = self.z1;
-
-        let alpha: &f32 = &self.alpha;
+        let a0 = self.a0;
+        let b1 = self.b1;
+        let mut y_prev = self.z1;
 
         for sample in buffer.iter_mut() {
-            let input: f32 = *sample;
-            let y: f32 = y_previous + alpha * (input - y_previous);
-
-            y_previous = y;
+            let x = *sample;
+            let y = a0 * x + b1 * y_prev;
+            y_prev = y;
             *sample = y;
         }
 
-        self.z1 = y_previous;
+        self.z1 = y_prev;
     }
 }

@@ -47,7 +47,8 @@ export default class SoftClipProcessor extends AudioWorkletProcessor {
     }
 
     private processChannel(channel: Float32Array, channelIndex: number): void {
-        this.softClip?.process(channel);
+        (channel && this.softClip)
+            && this.softClip.process(channel);
     }
 
     public process(inputs: Float32Array[][], outputs: Float32Array[][], parameters: any): boolean {
