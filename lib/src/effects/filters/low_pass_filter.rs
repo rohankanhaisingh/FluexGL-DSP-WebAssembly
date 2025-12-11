@@ -2,26 +2,40 @@ use std::f32::consts::PI;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
-pub struct LowPass {
+pub struct LowPassFilter {
     sample_rate: f32,
     cutoff: f32,
+    q: f32,
     min_freq: f32,
-    a0: f32,
+    b0: f32,
     b1: f32,
-    z1: f32,
+    b2: f32,
+    a1: f32,
+    a2: f32,
+    x1: f32,
+    x2: f32,
+    y1: f32,
+    y2: f32,
 }
 
 #[wasm_bindgen]
-impl LowPass {
+impl LowPassFilter {
     #[wasm_bindgen(constructor)]
-    pub fn new(sample_rate: f32, cutoff: f32) -> LowPass {
-        let mut lp = LowPass {
+    pub fn new(sample_rate: f32, cutoff: f32, q: f32) -> LowPassFilter {
+        let mut lp: LowPassFilter = LowPassFilter {
             sample_rate,
             cutoff,
+            q,
             min_freq: 10.0,
-            a0: 0.0,
+            b0: 0.0,
             b1: 0.0,
-            z1: 0.0,
+            b2: 0.0,
+            a1: 0.0,
+            a2: 0.0,
+            x1: 0.0,
+            x2: 0.0,
+            y1: 0.0,
+            y2: 0.0,
         };
 
         lp.update_coefficients();
@@ -33,8 +47,8 @@ impl LowPass {
         self.update_coefficients();
     }
 
-    pub fn set_min_freq(&mut self, min_freq: f32) {
-        self.min_freq = min_freq;
+    pub fn set_q(&mut self, q: f32) {
+        self.q = q;
         self.update_coefficients();
     }
 
@@ -43,42 +57,81 @@ impl LowPass {
         self.update_coefficients();
     }
 
+    pub fn set_min_freq(&mut self, min_freq: f32) {
+        self.min_freq = min_freq;
+        self.update_coefficients();
+    }
+
     pub fn reset(&mut self) {
-        self.z1 = 0.0;
+        self.x1 = 0.0;
+        self.x2 = 0.0;
+        self.y1 = 0.0;
+        self.y2 = 0.0;
     }
 
     fn update_coefficients(&mut self) {
-        let mut fc = self.cutoff;
+        let nyquist: f32 = self.sample_rate * 0.5;
+        let mut fc: f32 = self.cutoff;
 
         if fc < self.min_freq {
             fc = self.min_freq;
         }
-
-        let nyquist = self.sample_rate * 0.5;
         if fc > nyquist {
             fc = nyquist;
         }
+        let mut q: f32 = self.q;
+        if q < 0.1 {
+            q = 0.1;
+        }
 
-        // 1-pole low-pass: y[n] = a0 * x[n] + b1 * y[n-1]
-        // x = e^(-2π fc / fs)
-        let x = (-2.0 * PI * fc / self.sample_rate).exp();
+        let w0: f32 = 2.0 * PI * fc / self.sample_rate;
+        let cos_w0: f32 = w0.cos();
+        let sin_w0: f32 = w0.sin();
 
-        self.a0 = 1.0 - x;
-        self.b1 = x;
+        let alpha: f32 = sin_w0 / (2.0 * q);
+
+        let b0: f32 = (1.0 - cos_w0) * 0.5;
+        let b1: f32 = 1.0 - cos_w0;
+        let b2: f32 = (1.0 - cos_w0) * 0.5;
+        let a0: f32 = 1.0 + alpha;
+        let a1: f32 = -2.0 * cos_w0;
+        let a2: f32 = 1.0 - alpha;
+
+        self.b0 = b0 / a0;
+        self.b1 = b1 / a0;
+        self.b2 = b2 / a0;
+        self.a1 = a1 / a0;
+        self.a2 = a2 / a0;
     }
 
     pub fn process(&mut self, buffer: &mut [f32]) {
-        let a0 = self.a0;
-        let b1 = self.b1;
-        let mut y_prev = self.z1;
+        let b0: f32 = self.b0;
+        let b1: f32 = self.b1;
+        let b2: f32 = self.b2;
+        let a1: f32 = self.a1;
+        let a2: f32 = self.a2;
+
+        let mut x1: f32 = self.x1;
+        let mut x2: f32 = self.x2;
+        let mut y1: f32 = self.y1;
+        let mut y2: f32 = self.y2;
 
         for sample in buffer.iter_mut() {
-            let x = *sample;
-            let y = a0 * x + b1 * y_prev;
-            y_prev = y;
-            *sample = y;
+            let x0: f32 = *sample;
+
+            let y0: f32 = b0 * x0 + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2;
+
+            x2 = x1;
+            x1 = x0;
+            y2 = y1;
+            y1 = y0;
+
+            *sample = y0;
         }
 
-        self.z1 = y_prev;
+        self.x1 = x1;
+        self.x2 = x2;
+        self.y1 = y1;
+        self.y2 = y2;
     }
 }

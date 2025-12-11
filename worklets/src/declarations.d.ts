@@ -1,4 +1,8 @@
 declare abstract class AudioWorkletProcessor {
+    public id?: string;
+    public name?: string;
+    public createdAt?: number;
+
     public readonly port: MessagePort;
 
     public static parameterDescriptors?: AudioParamDescriptor[];
@@ -6,7 +10,7 @@ declare abstract class AudioWorkletProcessor {
 
     protected isReady: boolean;
     protected module: WebAssembly.Module | null;
-
+    
     constructor(options?: AudioWorkletNodeOptions);
 
     public process(
