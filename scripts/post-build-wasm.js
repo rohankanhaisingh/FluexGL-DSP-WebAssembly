@@ -29,12 +29,12 @@ const cp = require("child_process");
 
     fs.writeFileSync(oldDistModuleFilePath, newModuleFileContent, "utf-8");
     fs.writeFileSync(distModuleFilePath, newModuleFileContent, "utf-8");
-    console.log("[INFO]: ".yellow + "Succesfully added imports into generated javascript file. Now generating worklets...");
+    console.log(colors.bold("[INFO]: ".yellow) + "Succesfully added imports into generated javascript file. Now generating worklets...");
 
     const webpackConfigFile = path.join(projectRootDirectory, "webpack.config.cjs");
 
     if (!fs.existsSync(webpackConfigFile))
-        return console.log("[ERROR]: " + "Could not post build wasm module, because ")
+        return console.log(colors.bold("[ERROR]: ".red) + "Could not post build wasm module, because ")
 
     async function internalThread() {
         return new Promise(function (resolve, reject) {
@@ -48,5 +48,5 @@ const cp = require("child_process");
 
     await internalThread();
 
-    console.log("[SUCCES]: ".green + "Succesfully generated worklets. Post building wasm is now done, and ready for deployment.");
+    console.log(colors.bold("[SUCCESS]: ".green) + "Succesfully generated worklets. Post building wasm is now done, and ready for deployment.");
 })()
