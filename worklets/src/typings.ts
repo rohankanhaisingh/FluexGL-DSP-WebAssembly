@@ -7,6 +7,11 @@ export enum ProcessorIdentificationCodes {
     UnknownProcessorCreationDate = "UNKNOWN_PROCESSOR_CREATION_DATE"
 }
 
+export enum StrictMode {
+    Enabled = 0x00,
+    Disabled = 0x01
+}
+
 export interface ProcessorData {
     id: string | ProcessorIdentificationCodes.UnknownProcessorId;
     name: string | ProcessorIdentificationCodes.UnknownProcessorName;

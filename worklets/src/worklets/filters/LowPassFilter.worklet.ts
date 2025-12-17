@@ -1,6 +1,7 @@
 import { v4 } from "uuid";
 
-import { sendMessageToAudioWorkletNode } from "../../utilities/helpers";
+import { bufferHasNaN, sendMessageToAudioWorkletNode } from "../../utilities/helpers";
+import { StrictMode } from "../../typings";
 
 enum LowPassFilterMessageCommandId {
     SetCutoff,
@@ -21,8 +22,16 @@ export default class LowPassFilterProcessor extends AudioWorkletProcessor {
     public q: number = 0.7;
     public isReady: boolean = false;
 
+    private failed: boolean = false;
+    private strictMode: StrictMode = StrictMode.Disabled;
+
     constructor(options: AudioWorkletNodeOptions) {
-        super();
+        super(options);
+
+        this.strictMode = options.parameterData?.strictMode ?? this.strictMode;
+        this.cutoff = options.parameterData?.cutoff ?? this.cutoff;
+        this.minFrequency = options.parameterData?.minFrequency ?? this.minFrequency;
+        this.q = options.parameterData?.q ?? this.q;
 
         AudioWorkletProcessor.wasm(options.processorOptions.module).then(() => {
 
@@ -30,7 +39,9 @@ export default class LowPassFilterProcessor extends AudioWorkletProcessor {
 
             for (let c of outputChannelCount) {
                 for (let i = 0; i < c; i++) {
-                    const lp = new AudioWorkletProcessor.wasm.LowPassFilter(sampleRate, this.cutoff);
+                    const lp = new AudioWorkletProcessor.wasm.LowPassFilter(sampleRate, this.cutoff, this.q);
+                    lp.set_min_freq(this.minFrequency);
+                    lp.set_q(this.q);
                     lp.set_min_freq(this.minFrequency);
                     this.lowPassInstances.push(lp);
                 }
@@ -88,6 +99,8 @@ export default class LowPassFilterProcessor extends AudioWorkletProcessor {
 
     public process(inputs: Float32Array[][], outputs: Float32Array[][]): boolean {
 
+        if (this.failed) return true;
+
         const input = inputs[0];
         const output = outputs[0];
 
@@ -125,6 +138,15 @@ export default class LowPassFilterProcessor extends AudioWorkletProcessor {
             }
 
             lp.process(inCh);
+
+            if (this.strictMode && bufferHasNaN(inCh)) {
+
+                outCh.fill(0);
+                this.failed = true;
+                sendMessageToAudioWorkletNode(this, "error", `Failed to process because buffer contains NaN value.`, inCh);
+                return true;
+            }
+
             outCh.set(inCh);
         }
 

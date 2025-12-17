@@ -52,3 +52,14 @@ export function sendMessageToAudioWorkletNode(processor: AudioWorkletProcessor, 
         }
     } as AudioWorkletNodePostData);
 }
+
+export function bufferHasNaN(buffer: Float32Array): boolean {
+
+    for(let i = 0; i < buffer.length; i++) {
+        if(Number.isNaN(buffer[i])) {
+            return true;
+        }
+    }
+
+    return false;
+}

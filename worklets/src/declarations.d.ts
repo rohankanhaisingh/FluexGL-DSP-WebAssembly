@@ -10,7 +10,7 @@ declare abstract class AudioWorkletProcessor {
 
     protected isReady: boolean;
     protected module: WebAssembly.Module | null;
-    
+
     constructor(options?: AudioWorkletNodeOptions);
 
     public process(

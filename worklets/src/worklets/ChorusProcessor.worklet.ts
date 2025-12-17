@@ -1,3 +1,8 @@
+import { v4 } from "uuid";
+
+import { bufferHasNaN, sendMessageToAudioWorkletNode } from "../utilities/helpers";
+import { StrictMode } from "../typings";
+
 enum ChorusMessageCommandId {
     SetBaseDelayMs,
     SetDepthMs,
@@ -8,6 +13,10 @@ enum ChorusMessageCommandId {
 
 export default class ChorusProcessor extends AudioWorkletProcessor {
 
+    public id: string = v4();
+    public name: string = "ChorusProcessor";
+    public createdAt: number = Date.now();
+
     public chorus: (wasm_bindgen.Chorus | null)[] = [];
 
     public baseDelayMs: number = 15;
@@ -17,9 +26,13 @@ export default class ChorusProcessor extends AudioWorkletProcessor {
     public feedback: number = 0.2;
     public sampleRate: number = 44100;
 
+    private failed: boolean = false;
+    private strictMode: StrictMode = StrictMode.Disabled;
+
     constructor(options: AudioWorkletNodeOptions) {
         super(options);
 
+        this.strictMode = options.parameterData?.strictMode ?? this.strictMode;
         this.baseDelayMs = options.parameterData?.baseDelayMs ?? this.baseDelayMs;
         this.depthMs = options.parameterData?.depthMs ?? this.depthMs;
         this.rateHz = options.parameterData?.rateHz ?? this.rateHz;
@@ -73,25 +86,32 @@ export default class ChorusProcessor extends AudioWorkletProcessor {
     private setBaseDelayMs(v: number) {
         this.baseDelayMs = v ?? this.baseDelayMs;
         this.forEachInstance(c => c.set_base_delay_ms(this.baseDelayMs));
+        sendMessageToAudioWorkletNode(this, "message", `Set baseDelayMs of Chorus to ${this.baseDelayMs}.`);
     }
     private setDepthMs(v: number) {
         this.depthMs = v ?? this.depthMs;
         this.forEachInstance(c => c.set_depth_ms(this.depthMs));
+        sendMessageToAudioWorkletNode(this, "message", `Set depthMs of Chorus to ${this.depthMs}.`);
     }
     private setRateHz(v: number) {
         this.rateHz = v ?? this.rateHz;
         this.forEachInstance(c => c.set_rate_hz(this.rateHz));
+        sendMessageToAudioWorkletNode(this, "message", `Set rateHz of Chorus to ${this.rateHz}.`);
     }
     private setMix(v: number) {
         this.mix = v ?? this.mix;
         this.forEachInstance(c => c.set_mix(this.mix));
+        sendMessageToAudioWorkletNode(this, "message", `Set mix of Chorus to ${this.mix}.`);
     }
     private setFeedback(v: number) {
         this.feedback = v ?? this.feedback;
         this.forEachInstance(c => c.set_feedback(this.feedback));
+        sendMessageToAudioWorkletNode(this, "message", `Set feedback of Chorus to ${this.feedback}.`);
     }
 
     public process(inputs: Float32Array[][], outputs: Float32Array[][], parameters: any): boolean {
+        if (this.failed) return true;
+
         const input = inputs[0];
         const output = outputs[0];
 
@@ -127,6 +147,13 @@ export default class ChorusProcessor extends AudioWorkletProcessor {
 
             outChan.set(inChan);
             this.chorus[ch]!.process(outChan);
+
+            if (this.strictMode && bufferHasNaN(outChan)) {
+                outChan.fill(0);
+                this.failed = true;
+                sendMessageToAudioWorkletNode(this, "error", `Failed to process because buffer contains NaN value.`, outChan);
+                return true;
+            }
         }
 
         return true;
