@@ -1,4 +1,5 @@
-export type ChannelProcessor = (channel: Float32Array, channelIndex: number) => void;
+import { v4 } from "uuid";
+import { AudioWorkletNodePostData, ChannelProcessor, ProcessorIdentificationCodes, MessageType } from "../typings";
 
 export function processChannels(inputs: Float32Array[][], outputs: Float32Array[][], channelProcessor?: ChannelProcessor): void {
 
@@ -34,4 +35,31 @@ export function processChannels(inputs: Float32Array[][], outputs: Float32Array[
             channelProcessor(outChan, ch);
         }
     }
+}
+
+export function sendMessageToAudioWorkletNode(processor: AudioWorkletProcessor, type: MessageType, message: string, additionalData?: any) {
+
+    return processor.port.postMessage({
+        message,
+        type,
+        id: v4(),
+        timestamp: Date.now(), 
+        additionalData,
+        processor: {
+            id: processor.id ?? ProcessorIdentificationCodes.UnknownProcessorId,
+            name: processor.name ?? ProcessorIdentificationCodes.UnknownProcessorName,
+            createdAt: processor.createdAt ?? ProcessorIdentificationCodes.UnknownProcessorCreationDate
+        }
+    } as AudioWorkletNodePostData);
+}
+
+export function bufferHasNaN(buffer: Float32Array): boolean {
+
+    for(let i = 0; i < buffer.length; i++) {
+        if(Number.isNaN(buffer[i])) {
+            return true;
+        }
+    }
+
+    return false;
 }

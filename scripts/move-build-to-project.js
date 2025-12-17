@@ -18,7 +18,7 @@ const colors = require("colors");
         : path.join(projectRootDirectory, "project.config.json");
 
     if (!fs.existsSync(projectConfigurationFile))
-        return console.log("[ERROR]: ".red + `Could not find required project.config.json file. Input: ${projectConfigurationFile.underline}`);
+        return console.log(colors.bold("[ERROR]: ".red) + `Could not find required project.config.json file. Input: ${projectConfigurationFile.underline}`);
 
     const fileContent = fs.readFileSync(projectConfigurationFile),
         parsedFileContent = JSON.parse(fileContent);
@@ -26,7 +26,7 @@ const colors = require("colors");
     const outDirectory = parsedFileContent["outDir"];
 
     if (typeof outDirectory === "undefined")
-        return console.log("[ERROR]: ".red + `Could not prepare program because the required option 'outDir' has not been specified.`);
+        return console.log(colors.bold("[ERROR]: ".red) + `Could not prepare program because the required option 'outDir' has not been specified.`);
 
     const moveIncludes = parsedFileContent["includes"] ?? [
         "fluexgl-dsp-processor.worklet",
@@ -34,12 +34,12 @@ const colors = require("colors");
     ];
 
     if(!fs.existsSync(outDirectory))
-        return console.log("[ERROR]: ".red + `Could not move files into ${outDirectory}, because it could not be located.`);
+        return console.log(colors.bold("[ERROR]: ".red) + `Could not move files into ${outDirectory}, because it could not be located.`);
 
     const distDirectory = path.join(projectRootDirectory, "_dist");
 
     if(!fs.existsSync(distDirectory))
-        return console.log("[ERROR]: ".red + "Could not move files because the _dist file could not be located in the project's root directory.");
+        return console.log(colors.bold("[ERROR]: ".red) + "Could not move files because the _dist file could not be located in the project's root directory.");
 
     for(const fileName of moveIncludes) {
         
@@ -47,11 +47,11 @@ const colors = require("colors");
         const destinationFilePath = path.join(outDirectory, fileName);
 
         if(!fs.existsSync(includedFilePath)) {
-            console.log("[ERROR]: ".red + `Could not find ${includedFilePath}.`); 
+            console.log(colors.bold("[ERROR]: ".red) + `Could not find ${includedFilePath}.`); 
         } else {
             fs.copyFileSync(includedFilePath, destinationFilePath);
         }
     }
 
-    console.log("[SUCCES]: ".green + `Succesfully moved build DSP files into ${outDirectory}.`);
+    console.log(colors.bold("[SUCCESS]: ".green) + `Succesfully moved build DSP files into ${colors.bold(outDirectory.yellow)}.`);
 })();

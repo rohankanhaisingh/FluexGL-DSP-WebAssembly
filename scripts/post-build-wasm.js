@@ -22,26 +22,23 @@ const cp = require("child_process");
     const moduleFileContent = fs.readFileSync(distModuleFilePath);
 
     const newModuleFileContent = `
-        // This line has been generated from the 'post-build-wasm.js' script. \n
-        import { TextDecoder } from "text-decoding"; \n
+    import{TextDecoder}from"text-decoding";void 0===globalThis.crypto&&(globalThis.crypto={}),"function"!=typeof globalThis.crypto.getRandomValues&&(globalThis.crypto.getRandomValues=function(o){for(let t=0;t<o.length;t++)o[t]=Math.floor(256*Math.random());return o});
         ${moduleFileContent} \n
-        if(typeof AudioWorkletProcessor !== "undefined") {
-            AudioWorkletProcessor.wasm = wasm_bindgen;
-        }
+        if(typeof AudioWorkletProcessor !== "undefined") { AudioWorkletProcessor.wasm = wasm_bindgen; }
     `;
 
     fs.writeFileSync(oldDistModuleFilePath, newModuleFileContent, "utf-8");
     fs.writeFileSync(distModuleFilePath, newModuleFileContent, "utf-8");
-    console.log("[INFO]: ".yellow + "Succesfully added imports into generated javascript file. Now generating worklets...");
+    console.log(colors.bold("[INFO]: ".yellow) + "Succesfully added imports into generated javascript file. Now generating worklets...");
 
     const webpackConfigFile = path.join(projectRootDirectory, "webpack.config.cjs");
 
-    if(!fs.existsSync(webpackConfigFile))
-        return console.log("[ERROR]: " + "Could not post build wasm module, because ")
+    if (!fs.existsSync(webpackConfigFile))
+        return console.log(colors.bold("[ERROR]: ".red) + "Could not post build wasm module, because ")
 
     async function internalThread() {
-        return new Promise(function(resolve, reject) {
-            cp.exec(`npx webpack --config ${webpackConfigFile}`, function(err, stdout, stderr) {
+        return new Promise(function (resolve, reject) {
+            cp.exec(`npx webpack --config ${webpackConfigFile}`, function (err, stdout, stderr) {
 
                 stdout && console.log(stdout);
                 stderr && console.log(stderr);
@@ -51,5 +48,5 @@ const cp = require("child_process");
 
     await internalThread();
 
-    console.log("[SUCCES]: ".green + "Succesfully generated worklets. Post building wasm is now done, and ready for deployment.");
+    console.log(colors.bold("[SUCCESS]: ".green) + "Succesfully generated worklets. Post building wasm is now done, and ready for deployment.");
 })()

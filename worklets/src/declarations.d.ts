@@ -1,4 +1,8 @@
 declare abstract class AudioWorkletProcessor {
+    public id?: string;
+    public name?: string;
+    public createdAt?: number;
+
     public readonly port: MessagePort;
 
     public static parameterDescriptors?: AudioParamDescriptor[];
