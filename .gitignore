@@ -165,3 +165,5 @@ vite.config.ts.timestamp-*
 .vite/
 
 project.config.json
+
+.vs
