@@ -1,4 +1,8 @@
 declare abstract class AudioWorkletProcessor {
+    public id?: string;
+    public name?: string;
+    public createdAt?: number;
+
     public readonly port: MessagePort;
 
     public static parameterDescriptors?: AudioParamDescriptor[];
@@ -6,7 +10,7 @@ declare abstract class AudioWorkletProcessor {
 
     protected isReady: boolean;
     protected module: WebAssembly.Module | null;
-
+    
     constructor(options?: AudioWorkletNodeOptions);
 
     public process(
@@ -37,9 +41,9 @@ interface AudioWorkletProcessorConstructor {
     new (options: AudioWorkletNodeOptions): AudioWorkletProcessor;
 }
 
-interface MessagePortEventData {
-    type: string;
-    value: any;
+interface MessagePortEventData<T, K = any> {
+    commandId: T;
+    data: K;
 }
 
 declare function registerProcessor(

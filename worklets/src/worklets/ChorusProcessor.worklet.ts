@@ -1,3 +1,11 @@
+enum ChorusMessageCommandId {
+    SetBaseDelayMs,
+    SetDepthMs,
+    SetRateHz,
+    SetMix,
+    SetFeedback
+}
+
 export default class ChorusProcessor extends AudioWorkletProcessor {
 
     public chorus: (wasm_bindgen.Chorus | null)[] = [];
@@ -20,19 +28,25 @@ export default class ChorusProcessor extends AudioWorkletProcessor {
         this.sampleRate = options.parameterData?.sampleRate ?? this.sampleRate;
 
         this.port.onmessage = (event: MessageEvent) => {
-            const data: MessagePortEventData = event.data;
-            switch (data.type) {
-                case "set-base-delay-ms": return this.setBaseDelayMs(data.value);
-                case "set-depth-ms": return this.setDepthMs(data.value);
-                case "set-rate-hz": return this.setRateHz(data.value);
-                case "set-mix": return this.setMix(data.value);
-                case "set-feedback": return this.setFeedback(data.value);
+            
+            const data: MessagePortEventData<ChorusMessageCommandId, number> = event.data;
+
+            switch(data.commandId) {
+                case ChorusMessageCommandId.SetBaseDelayMs:
+                    return this.setBaseDelayMs(data.data);
+                case ChorusMessageCommandId.SetDepthMs:
+                    return this.setDepthMs(data.data);
+                case ChorusMessageCommandId.SetRateHz:
+                    return this.setRateHz(data.data);
+                case ChorusMessageCommandId.SetMix:
+                    return this.setMix(data.data);
+                case ChorusMessageCommandId.SetFeedback:
+                    return this.setFeedback(data.data);
             }
         };
 
         AudioWorkletProcessor.wasm(options.processorOptions.module).then(() => {
             this.isReady = true;
-            // Instances created lazily per-channel in process().
         });
     }
 
@@ -104,7 +118,7 @@ export default class ChorusProcessor extends AudioWorkletProcessor {
             if (!inChan || !outChan) continue;
 
             this.ensureInstance(ch);
-            
+
             // If bypass, just copy input to output but still ensure instances exist
             if ((this.mix ?? 0) === 0 || !this.chorus[ch]) {
                 outChan.set(inChan);
