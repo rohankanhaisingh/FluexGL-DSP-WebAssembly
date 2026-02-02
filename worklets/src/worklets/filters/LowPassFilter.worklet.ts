@@ -42,7 +42,6 @@ export default class LowPassFilterProcessor extends AudioWorkletProcessor {
                     const lp = new AudioWorkletProcessor.wasm.LowPassFilter(sampleRate, this.cutoff, this.q);
                     lp.set_min_freq(this.minFrequency);
                     lp.set_q(this.q);
-                    lp.set_min_freq(this.minFrequency);
                     this.lowPassInstances.push(lp);
                 }
             }
@@ -124,8 +123,8 @@ export default class LowPassFilterProcessor extends AudioWorkletProcessor {
 
         for (let ch = 0; ch < channels; ch++) {
 
-            let inCh: Float32Array | null = input[ch] ?? null;
-            let outCh: Float32Array | null = output[ch] ?? null;
+            const inCh: Float32Array | null = input[ch] ?? null;
+            const outCh: Float32Array | null = output[ch] ?? null;
 
             const lp = this.lowPassInstances[ch];
 
@@ -137,17 +136,16 @@ export default class LowPassFilterProcessor extends AudioWorkletProcessor {
                 continue;
             }
 
-            lp.process(inCh);
+            outCh.set(inCh);
+            lp.process(outCh);
 
-            if (this.strictMode && bufferHasNaN(inCh)) {
+            if (this.strictMode && bufferHasNaN(outCh)) {
 
                 outCh.fill(0);
                 this.failed = true;
-                sendMessageToAudioWorkletNode(this, "error", `Failed to process because buffer contains NaN value.`, inCh);
+                sendMessageToAudioWorkletNode(this, "error", `Failed to process because buffer contains NaN value.`, outCh);
                 return true;
             }
-
-            outCh.set(inCh);
         }
 
         return true;

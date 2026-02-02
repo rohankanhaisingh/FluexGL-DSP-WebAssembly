@@ -65,7 +65,7 @@ export default class ChorusProcessor extends AudioWorkletProcessor {
 
     private ensureInstance(channelIndex: number) {
         if (!this.chorus[channelIndex]) {
-            this.chorus[channelIndex] = new AudioWorkletProcessor.wasm.Chorus(
+            const inst = new AudioWorkletProcessor.wasm.Chorus(
                 this.sampleRate,
                 this.baseDelayMs,
                 this.depthMs,
@@ -73,6 +73,9 @@ export default class ChorusProcessor extends AudioWorkletProcessor {
                 this.mix,
                 this.feedback
             );
+            // Spread channel phases to avoid perfectly correlated L/R modulation.
+            inst.set_phase_offset((channelIndex * 0.25) % 1);
+            this.chorus[channelIndex] = inst;
         }
     }
 

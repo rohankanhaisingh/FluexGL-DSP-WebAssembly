@@ -18,6 +18,29 @@ pub struct Chorus {
 
 #[wasm_bindgen]
 impl Chorus {
+    fn compute_required_delay_samples(sample_rate: f32, base_delay_ms: f32, depth_ms: f32) -> usize {
+        // Unipolar modulation uses [base, base + depth], so this is the maximum delay needed.
+        let max_ms = (base_delay_ms + depth_ms).max(1.0).min(100.0);
+        ((max_ms / 1000.0) * sample_rate).ceil().max(2.0) as usize
+    }
+
+    fn ensure_delay_capacity(&mut self) {
+        let required = Self::compute_required_delay_samples(
+            self.sample_rate,
+            self.base_delay_ms,
+            self.depth_ms,
+        );
+
+        if required > self.max_delay_samples {
+            self.delay_line.resize(required, 0.0);
+            self.max_delay_samples = required;
+
+            if self.write_idx >= self.max_delay_samples {
+                self.write_idx %= self.max_delay_samples;
+            }
+        }
+    }
+
     #[wasm_bindgen(constructor)]
     pub fn new(
         sample_rate: f32,
@@ -32,9 +55,7 @@ impl Chorus {
         let base = base_delay_ms.max(0.0);
         let depth = depth_ms.max(0.0);
 
-        // Cap the maximum internal delay line to 100ms for safety.
-        let max_ms = (base + depth).max(1.0).min(100.0);
-        let max_delay_samples = ((max_ms / 1000.0) * sr).ceil().max(2.0) as usize;
+        let max_delay_samples = Self::compute_required_delay_samples(sr, base, depth);
 
         Chorus {
             sample_rate: sr,
@@ -61,14 +82,12 @@ impl Chorus {
         for x in buffer.iter_mut() {
             // LFO in [-1, 1]
             let lfo = (2.0 * std::f32::consts::PI * self.phase).sin();
-            self.phase += self.rate_hz / sr;
-            if self.phase >= 1.0 {
-                self.phase -= 1.0;
-            }
+            self.phase = (self.phase + (self.rate_hz / sr)).fract();
 
-            // Delay in samples, centered around base with +/- depth modulation
-            let delay_ms = self.base_delay_ms + self.depth_ms * lfo;
-            let mut delay_samples = ((delay_ms / 1000.0) * sr) as f32;
+            // Unipolar modulation keeps delay strictly non-negative: [base, base + depth].
+            let lfo_01 = 0.5 * (lfo + 1.0);
+            let delay_ms = self.base_delay_ms + self.depth_ms * lfo_01;
+            let mut delay_samples = (delay_ms / 1000.0) * sr;
 
             // Clamp within the buffer (keep room for interpolation)
             let max_read = (len as f32 - 2.0).max(0.0);
@@ -110,10 +129,12 @@ impl Chorus {
 
     pub fn set_depth_ms(&mut self, depth_ms: f32) {
         self.depth_ms = depth_ms.max(0.0);
+        self.ensure_delay_capacity();
     }
 
     pub fn set_base_delay_ms(&mut self, base_delay_ms: f32) {
         self.base_delay_ms = base_delay_ms.max(0.0);
+        self.ensure_delay_capacity();
     }
 
     pub fn set_mix(&mut self, mix: f32) {
@@ -122,6 +143,10 @@ impl Chorus {
 
     pub fn set_feedback(&mut self, feedback: f32) {
         self.feedback = feedback.clamp(-0.95, 0.95);
+    }
+
+    pub fn set_phase_offset(&mut self, phase: f32) {
+        self.phase = phase.fract().abs();
     }
 
     pub fn get_rate_hz(&self) -> f32 { self.rate_hz }

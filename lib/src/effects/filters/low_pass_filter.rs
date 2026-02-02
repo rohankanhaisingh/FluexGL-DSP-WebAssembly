@@ -20,12 +20,28 @@ pub struct LowPassFilter {
 
 #[wasm_bindgen]
 impl LowPassFilter {
+    fn set_passthrough_coefficients(&mut self) {
+        self.b0 = 1.0;
+        self.b1 = 0.0;
+        self.b2 = 0.0;
+        self.a1 = 0.0;
+        self.a2 = 0.0;
+    }
+
+    fn sanitize_sample_rate(sample_rate: f32) -> f32 {
+        if sample_rate.is_finite() {
+            sample_rate.max(1.0)
+        } else {
+            44_100.0
+        }
+    }
+
     #[wasm_bindgen(constructor)]
     pub fn new(sample_rate: f32, cutoff: f32, q: f32) -> LowPassFilter {
         let mut lp: LowPassFilter = LowPassFilter {
-            sample_rate,
-            cutoff,
-            q,
+            sample_rate: Self::sanitize_sample_rate(sample_rate),
+            cutoff: if cutoff.is_finite() { cutoff.max(0.0) } else { 1_000.0 },
+            q: if q.is_finite() { q.max(0.1) } else { 0.7 },
             min_freq: 10.0,
             b0: 0.0,
             b1: 0.0,
@@ -43,22 +59,28 @@ impl LowPassFilter {
     }
 
     pub fn set_cutoff(&mut self, cutoff: f32) {
-        self.cutoff = cutoff;
+        if cutoff.is_finite() {
+            self.cutoff = cutoff.max(0.0);
+        }
         self.update_coefficients();
     }
 
     pub fn set_q(&mut self, q: f32) {
-        self.q = q;
+        if q.is_finite() {
+            self.q = q.max(0.1);
+        }
         self.update_coefficients();
     }
 
     pub fn set_sample_rate(&mut self, sample_rate: f32) {
-        self.sample_rate = sample_rate;
+        self.sample_rate = Self::sanitize_sample_rate(sample_rate);
         self.update_coefficients();
     }
 
     pub fn set_min_freq(&mut self, min_freq: f32) {
-        self.min_freq = min_freq;
+        if min_freq.is_finite() {
+            self.min_freq = min_freq.max(0.0);
+        }
         self.update_coefficients();
     }
 
@@ -70,17 +92,38 @@ impl LowPassFilter {
     }
 
     fn update_coefficients(&mut self) {
-        let nyquist: f32 = self.sample_rate * 0.5;
-        let mut fc: f32 = self.cutoff;
+        if !self.sample_rate.is_finite() || self.sample_rate <= 0.0 {
+            self.set_passthrough_coefficients();
+            return;
+        }
 
-        if fc < self.min_freq {
-            fc = self.min_freq;
+        let nyquist: f32 = self.sample_rate * 0.5;
+        if !nyquist.is_finite() || nyquist <= 0.0 {
+            self.set_passthrough_coefficients();
+            return;
         }
-        if fc > nyquist {
-            fc = nyquist;
+
+        let mut fc: f32 = self.cutoff;
+        if !fc.is_finite() {
+            fc = self.min_freq.max(0.0);
         }
+
+        let mut min_fc = self.min_freq;
+        if !min_fc.is_finite() || min_fc < 0.0 {
+            min_fc = 0.0;
+        }
+
+        let max_fc = (nyquist - 1.0e-3).max(1.0e-3);
+
+        if fc < min_fc {
+            fc = min_fc;
+        }
+        if fc > max_fc {
+            fc = max_fc;
+        }
+
         let mut q: f32 = self.q;
-        if q < 0.1 {
+        if !q.is_finite() || q < 0.1 {
             q = 0.1;
         }
 
@@ -97,11 +140,25 @@ impl LowPassFilter {
         let a1: f32 = -2.0 * cos_w0;
         let a2: f32 = 1.0 - alpha;
 
+        if !a0.is_finite() || a0.abs() <= f32::EPSILON {
+            self.set_passthrough_coefficients();
+            return;
+        }
+
         self.b0 = b0 / a0;
         self.b1 = b1 / a0;
         self.b2 = b2 / a0;
         self.a1 = a1 / a0;
         self.a2 = a2 / a0;
+
+        if !(self.b0.is_finite()
+            && self.b1.is_finite()
+            && self.b2.is_finite()
+            && self.a1.is_finite()
+            && self.a2.is_finite())
+        {
+            self.set_passthrough_coefficients();
+        }
     }
 
     pub fn process(&mut self, buffer: &mut [f32]) {

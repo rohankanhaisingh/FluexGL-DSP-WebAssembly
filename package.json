@@ -1,6 +1,6 @@
 {
     "name": "fluexgl-dsp-webassembly",
-    "version": "0.3.2",
+    "version": "0.4.7",
     "description": "Rust source code which will be compiled into WASM, made for FluexGL-DSP.",
     "main": "index.js",
     "directories": {
