@@ -113,7 +113,7 @@ impl LowPassFilter {
             min_fc = 0.0;
         }
 
-        let max_fc = (nyquist - 1.0e-3).max(1.0e-3);
+        let max_fc: f32 = (nyquist * 0.99).max(1.0e-3);
 
         if fc < min_fc {
             fc = min_fc;
