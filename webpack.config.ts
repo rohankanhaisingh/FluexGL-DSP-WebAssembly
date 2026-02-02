@@ -3,6 +3,8 @@
 import path from "path";
 
 import HtmlMinimizerPlugin from "html-minimizer-webpack-plugin";
+import TerserPlugin from "terser-webpack-plugin";
+
 import type { Configuration } from "webpack";
 
 const rootDir: string = path.join(__dirname),
@@ -44,7 +46,8 @@ const config: Configuration = {
         runtimeChunk: false,
         minimize: true,
         minimizer: [
-            new HtmlMinimizerPlugin()
+            new HtmlMinimizerPlugin(),
+            new TerserPlugin()
         ]
     }
 };

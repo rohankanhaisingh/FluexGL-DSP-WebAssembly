@@ -6,6 +6,7 @@ const cp = require("child_process");
 (async function () {
 
     colors.enable();
+    console.log(colors.bold("[STEP 2/4]:".bgMagenta) + " Post building compiled source files..");
 
     const projectRootDirectory = path.join(__dirname, "../"),
         projectDistDirectory = path.join(projectRootDirectory, "_dist");
@@ -21,11 +22,7 @@ const cp = require("child_process");
 
     const moduleFileContent = fs.readFileSync(distModuleFilePath);
 
-    const newModuleFileContent = `
-    import{TextDecoder}from"text-decoding";void 0===globalThis.crypto&&(globalThis.crypto={}),"function"!=typeof globalThis.crypto.getRandomValues&&(globalThis.crypto.getRandomValues=function(o){for(let t=0;t<o.length;t++)o[t]=Math.floor(256*Math.random());return o});
-        ${moduleFileContent} \n
-        if(typeof AudioWorkletProcessor !== "undefined") { AudioWorkletProcessor.wasm = wasm_bindgen; }
-    `;
+    const newModuleFileContent = `import {TextDecoder} from "text-decoding";void 0===globalThis.crypto&&(globalThis.crypto={}),"function"!=typeof globalThis.crypto.getRandomValues&&(globalThis.crypto.getRandomValues=function(o){for(let t=0;t<o.length;t++)o[t]=Math.floor(256*Math.random());return o}); ${moduleFileContent} \n if(typeof AudioWorkletProcessor !== "undefined") { AudioWorkletProcessor.wasm = wasm_bindgen; }`;
 
     fs.writeFileSync(oldDistModuleFilePath, newModuleFileContent, "utf-8");
     fs.writeFileSync(distModuleFilePath, newModuleFileContent, "utf-8");

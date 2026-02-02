@@ -8,7 +8,7 @@
     },
     "scripts": {
         "build-wasm": "node ./scripts/build-wasm.js",
-        "build-pipeline": "node ./scripts/build-wasm.js && node ./scripts/post-build-wasm.js && node ./scripts/move-build-to-project.js"
+        "build-pipeline": "node ./scripts/build-wasm.js && node ./scripts/post-build-wasm.js && node ./scripts/minify-worklet.js && node ./scripts/move-build-to-project.js"
     },
     "repository": {
         "type": "git",
@@ -31,12 +31,13 @@
         "eslint": "^9.39.1",
         "glob": "^11.0.3",
         "html-minimizer-webpack-plugin": "^5.0.3",
-        "terser-webpack-plugin": "^5.3.14",
+        "terser": "^5.46.0",
         "text-decoder": "^1.2.3",
         "text-decoding": "^1.0.0",
         "uuid": "^13.0.0"
     },
     "devDependencies": {
+        "terser-webpack-plugin": "^5.3.16",
         "ts-loader": "^9.5.4",
         "ts-node": "^10.9.2",
         "typescript": "^5.9.3",

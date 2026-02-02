@@ -6,6 +6,7 @@ const colors = require("colors");
 (async function () {
 
     colors.enable();
+    console.log(colors.bold("[STEP 1/4]:".bgMagenta) + " Compiling Rust-code into Web Assembly.");
 
     const projectRootDirectory = path.join(__dirname, "../");
 
@@ -13,8 +14,7 @@ const colors = require("colors");
     const distSourceDirectory = path.join(projectRootDirectory, "_dist");
 
     if (!fs.existsSync(wasmSourceDirectory) || !fs.existsSync(distSourceDirectory))
-        return console.log(console.bold("[ERROR]: ".red) + `Could not build wasm because the source directory could not be located.`);
-
+        return console.log(colors.bold("[ERROR]: ".red) + `Could not build wasm because the source directory could not be located.`);
 
     async function internalThread() {
         return new Promise(function (resolve, reject) {
@@ -26,7 +26,6 @@ const colors = require("colors");
             })
         });
     }
-
 
     await internalThread();
 

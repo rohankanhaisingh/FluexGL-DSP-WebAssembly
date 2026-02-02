@@ -5,6 +5,7 @@ const colors = require("colors");
 (function () {
 
     colors.enable();
+    console.log(colors.bold("[STEP 4/4]:".bgMagenta) + " Moving results into project.");
 
     /** @type {string[]} */
     const args = process.argv;
