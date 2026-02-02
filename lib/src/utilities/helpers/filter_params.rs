@@ -84,3 +84,7 @@ pub fn normalize_highpass_params(sample_rate: f32, cutoff: f32, resonance: f32, 
 
     Some((frequency_cutoff, mutable_resonance, sample_rate))
 }
+
+pub fn normalize_notch_params(sample_rate: f32, cutoff: f32, resonance: f32, min_frequency: f32) -> Option<(f32, f32, f32)> {
+    normalize_lowpass_params(sample_rate, cutoff, resonance, min_frequency)
+}

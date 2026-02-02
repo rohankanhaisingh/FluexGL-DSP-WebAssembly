@@ -6,9 +6,7 @@ use crate::utilities::helpers::filter_params::normalize_highpass_params;
 use crate::utilities::helpers::rbj::rbj_highpass;
 use crate::utilities::helpers::sanitize_sample_rate::sanitize_sample_rate;
 
-const DEFAULT_CUTOFF: f32 = 500.0;
-const DEFAULT_Q: f32 = 0.7;
-const MIN_Q: f32 = 0.1;
+use crate::utilities::constants::*;
 
 #[wasm_bindgen]
 pub struct HighPassFilter {
@@ -38,9 +36,9 @@ impl HighPassFilter {
                 DEFAULT_CUTOFF
             },
             q: if q.is_finite() {
-                q.max(MIN_Q)
+                q.max(MIN_RESONANCE)
             } else {
-                DEFAULT_Q
+                DEFAULT_RESONANCE
             },
             // Requested behavior: default max frequency equals sample rate.
             max_freq: sr,
@@ -61,7 +59,7 @@ impl HighPassFilter {
 
     pub fn set_q(&mut self, q: f32) {
         if q.is_finite() {
-            self.q = q.max(MIN_Q);
+            self.q = q.max(MIN_RESONANCE);
             self.update_coefficients();
         }
     }

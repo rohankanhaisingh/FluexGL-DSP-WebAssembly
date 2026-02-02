@@ -6,9 +6,7 @@ use crate::utilities::helpers::filter_params::normalize_lowpass_params;
 use crate::utilities::helpers::rbj::rbj_lowpass;
 use crate::utilities::helpers::sanitize_sample_rate::sanitize_sample_rate;
 
-const DEFAULT_CUTOFF: f32 = 1_000.0;
-const DEFAULT_Q: f32 = 0.7;
-const MIN_Q: f32 = 0.1;
+use crate::utilities::constants::*;
 
 #[wasm_bindgen]
 pub struct LowPassFilter {
@@ -31,7 +29,7 @@ impl LowPassFilter {
         let mut lp: LowPassFilter = LowPassFilter {
             sample_rate: sanitize_sample_rate(sample_rate),
             cutoff: if cutoff.is_finite() { cutoff.max(0.0) } else { DEFAULT_CUTOFF },
-            q: if q.is_finite() { q.max(MIN_Q) } else { DEFAULT_Q },
+            q: if q.is_finite() { q.max(MIN_RESONANCE) } else { DEFAULT_RESONANCE },
             min_freq: 10.0,
             biquad: Biquad::passthrough(),
             state: State::new(),
@@ -50,7 +48,7 @@ impl LowPassFilter {
 
     pub fn set_q(&mut self, q: f32) {
         if q.is_finite() {
-            self.q = q.max(MIN_Q);
+            self.q = q.max(MIN_RESONANCE);
         }
         self.update_coefficients();
     }
