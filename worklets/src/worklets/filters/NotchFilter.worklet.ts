@@ -15,7 +15,7 @@ export default class NotchFilterProcessor extends AudioWorkletProcessor {
     public name: string = "NotchFilterProcessor";
     public createdAt: number = Date.now();
 
-    // Use broad typing until wasm typings are regenerated in _dist.
+    // Use broad typing until wasm typings are regenerated in dist.
     public notchInstances: Array<any> = [];
 
     public cutoff: number = 1000;

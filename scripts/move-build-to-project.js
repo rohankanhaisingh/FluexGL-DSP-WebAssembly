@@ -37,10 +37,10 @@ const colors = require("colors");
     if(!fs.existsSync(outDirectory))
         return console.log(colors.bold("[ERROR]: ".red) + `Could not move files into ${outDirectory}, because it could not be located.`);
 
-    const distDirectory = path.join(projectRootDirectory, "_dist");
+    const distDirectory = path.join(projectRootDirectory, "dist");
 
     if(!fs.existsSync(distDirectory))
-        return console.log(colors.bold("[ERROR]: ".red) + "Could not move files because the _dist file could not be located in the project's root directory.");
+        return console.log(colors.bold("[ERROR]: ".red) + "Could not move files because the dist file could not be located in the project's root directory.");
 
     for(const fileName of moveIncludes) {
         

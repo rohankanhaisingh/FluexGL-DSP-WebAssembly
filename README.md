@@ -135,7 +135,7 @@ You can build the source code using several provided scripts.
 
 #### Results
 
-These commands will build the WebAssembly and worklet files into the `_dist/` folder.  
+These commands will build the WebAssembly and worklet files into the `dist/` folder.  
 The generated files can be used when initializing the DSP pipeline.
 
 ---
@@ -190,7 +190,7 @@ export default class CustomProcessor extends AudioWorkletProcessor {
 **`exports.ts`**
 
 ```ts
-import "../../_dist/fluexgl-dsp-wasm.js";
+import "../../dist/fluexgl-dsp-wasm.js";
 
 import SoftClipProcessor from "./worklets/SoftClipProcessor.worklet";
 import WhiteNoiseProcessor from "./worklets/WhiteNoiseProcessor.worklet";

@@ -9,10 +9,10 @@ const terser = require("terser");
     console.log(colors.bold("[STEP 3/4]:".bgMagenta) + " Minifying worklet source file.");
 
     const projectRootDirectory = path.join(__dirname, "../"),
-        projectDistDirectory = path.join(projectRootDirectory, "_dist");
+        projectDistDirectory = path.join(projectRootDirectory, "dist");
 
     if(!fs.existsSync(projectDistDirectory))
-        return console.log(colors.bold("[ERROR]: ".red) + "Could not minify worklet files because the _dist directory could not be located.");
+        return console.log(colors.bold("[ERROR]: ".red) + "Could not minify worklet files because the dist directory could not be located.");
 
     const workletFilePath = path.join(projectDistDirectory, "fluexgl-dsp-processor.worklet"),
         oldWorkletFilePath = path.join(projectDistDirectory, "fluexgl-dsp-processor.old.worklet");

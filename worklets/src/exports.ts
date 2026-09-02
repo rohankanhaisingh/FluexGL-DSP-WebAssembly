@@ -1,4 +1,4 @@
-import "../../_dist/fluexgl-dsp-wasm.js";
+import "../../dist/fluexgl-dsp-wasm.js";
 
 import WhiteNoiseProcessor from "./worklets/WhiteNoiseProcessor.worklet";
 import ChorusProcessor from "./worklets/ChorusProcessor.worklet";

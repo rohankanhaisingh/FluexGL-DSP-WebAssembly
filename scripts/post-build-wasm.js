@@ -9,10 +9,10 @@ const cp = require("child_process");
     console.log(colors.bold("[STEP 2/4]:".bgMagenta) + " Post building compiled source files..");
 
     const projectRootDirectory = path.join(__dirname, "../"),
-        projectDistDirectory = path.join(projectRootDirectory, "_dist");
+        projectDistDirectory = path.join(projectRootDirectory, "dist");
 
     if (!fs.existsSync(projectDistDirectory))
-        return console.error("[ERROR]: " + "Could not post build wasm, because the _dist directory could not be located.");
+        return console.error("[ERROR]: " + "Could not post build wasm, because the dist directory could not be located.");
 
     const distModuleFilePath = path.join(projectDistDirectory, "fluexgl-dsp-wasm.js"),
         oldDistModuleFilePath = path.join(projectDistDirectory, "fluexgl-dsp.wasm.old.js");
@@ -35,7 +35,7 @@ const cp = require("child_process");
 
     async function internalThread() {
         return new Promise(function (resolve, reject) {
-            cp.exec(`npx webpack --config ${webpackConfigFile}`, function (err, stdout, stderr) {
+            cp.exec(`npx webpack --config "${webpackConfigFile}"`, function (err, stdout, stderr) {
 
                 stdout && console.log(stdout);
                 stderr && console.log(stderr);

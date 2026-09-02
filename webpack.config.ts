@@ -11,7 +11,7 @@ const rootDir: string = path.join(__dirname),
     workletsDirectoryPath: string = path.join(rootDir, "worklets"),
     workletsSourceDirectoryPath: string = path.join(workletsDirectoryPath, "src");
 
-const webAssemblyDistDirectoryPath: string = path.join(rootDir, "_dist");
+const webAssemblyDistDirectoryPath: string = path.join(rootDir, "dist");
 
 const config: Configuration = {
     mode: "production",

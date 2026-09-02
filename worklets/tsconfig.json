@@ -18,6 +18,6 @@
         "**/*.ts",
         "**/*.js",
         "**/*.d.ts",
-        "../_dist/fluexgl-dsp-wasm.d.ts"
+        "../dist/fluexgl-dsp-wasm.d.ts"
     ]
 }
