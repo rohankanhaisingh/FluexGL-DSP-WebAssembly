@@ -9,6 +9,7 @@ pub struct HardClip {
 #[wasm_bindgen]
 impl HardClip {
 
+    #[wasm_bindgen(constructor)]
     pub fn new(drive: f32, gain: f32) -> HardClip {
         HardClip { drive, gain }
     }
