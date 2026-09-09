@@ -2,6 +2,7 @@ import "../../dist/fluexgl-dsp-wasm.js";
 
 import WhiteNoiseProcessor from "./worklets/WhiteNoiseProcessor.worklet";
 import ChorusProcessor from "./worklets/ChorusProcessor.worklet";
+import ReverbProcessor from "./worklets/ReverbProcessor.worklet";
 
 import HardClipProcessor from "./worklets/clips/HardClipProcessor.worklet";
 import SoftClipProcessor from "./worklets/clips/SoftClipProcessor.worklet";
@@ -14,6 +15,7 @@ registerProcessor("HardClipProcessor", HardClipProcessor);
 registerProcessor("SoftClipProcessor", SoftClipProcessor);
 registerProcessor("WhiteNoiseProcessor", WhiteNoiseProcessor);
 registerProcessor("ChorusProcessor", ChorusProcessor);
+registerProcessor("ReverbProcessor", ReverbProcessor);
 registerProcessor("LowPassFilterProcessor", LowPassFilterProcessor);
 registerProcessor("HighPassFilterProcessor", HighPassFilterProcessor);
 registerProcessor("NotchFilterProcessor", NotchFilterProcessor);

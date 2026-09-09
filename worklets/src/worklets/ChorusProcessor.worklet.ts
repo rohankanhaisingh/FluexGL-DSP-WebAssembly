@@ -24,8 +24,8 @@ export default class ChorusProcessor extends AudioWorkletProcessor {
     public rateHz: number = 1.5;
     public mix: number = 0;
     public feedback: number = 0.2;
-    public sampleRate: number = 44100;
 
+    public isReady: boolean = false;
     private failed: boolean = false;
     private strictMode: StrictMode = StrictMode.Disabled;
 
@@ -38,7 +38,6 @@ export default class ChorusProcessor extends AudioWorkletProcessor {
         this.rateHz = options.parameterData?.rateHz ?? this.rateHz;
         this.mix = options.parameterData?.mix ?? this.mix;
         this.feedback = options.parameterData?.feedback ?? this.feedback;
-        this.sampleRate = options.parameterData?.sampleRate ?? this.sampleRate;
 
         this.port.onmessage = (event: MessageEvent) => {
             
@@ -66,7 +65,7 @@ export default class ChorusProcessor extends AudioWorkletProcessor {
     private ensureInstance(channelIndex: number) {
         if (!this.chorus[channelIndex]) {
             const inst = new AudioWorkletProcessor.wasm.Chorus(
-                this.sampleRate,
+                sampleRate,
                 this.baseDelayMs,
                 this.depthMs,
                 this.rateHz,
