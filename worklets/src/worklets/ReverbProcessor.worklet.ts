@@ -6,7 +6,9 @@ import { StrictMode } from "../typings";
 enum ReverbMessageCommandId {
     SetRoomSize,
     SetDamping,
-    SetMix,
+    SetDry,
+    SetWet,
+    SetPreDelayMs,
     SetStereoSpreadMs
 }
 
@@ -25,7 +27,9 @@ export default class ReverbProcessor extends AudioWorkletProcessor {
 
     public roomSize: number = 0.5;
     public damping: number = 0.5;
-    public mix: number = 0.3;
+    public dry: number = 0.7;
+    public wet: number = 0.3;
+    public preDelayMs: number = 0;
     public stereoSpreadMs: number = DEFAULT_STEREO_SPREAD_MS;
 
     public isReady: boolean = false;
@@ -38,7 +42,9 @@ export default class ReverbProcessor extends AudioWorkletProcessor {
         this.strictMode = options.parameterData?.strictMode ?? this.strictMode;
         this.roomSize = options.parameterData?.roomSize ?? this.roomSize;
         this.damping = options.parameterData?.damping ?? this.damping;
-        this.mix = options.parameterData?.mix ?? this.mix;
+        this.dry = options.parameterData?.dry ?? this.dry;
+        this.wet = options.parameterData?.wet ?? this.wet;
+        this.preDelayMs = options.parameterData?.preDelayMs ?? this.preDelayMs;
         this.stereoSpreadMs = options.parameterData?.stereoSpreadMs ?? this.stereoSpreadMs;
 
         this.port.onmessage = (event: MessageEvent) => {
@@ -50,8 +56,12 @@ export default class ReverbProcessor extends AudioWorkletProcessor {
                     return this.setRoomSize(data.data);
                 case ReverbMessageCommandId.SetDamping:
                     return this.setDamping(data.data);
-                case ReverbMessageCommandId.SetMix:
-                    return this.setMix(data.data);
+                case ReverbMessageCommandId.SetDry:
+                    return this.setDry(data.data);
+                case ReverbMessageCommandId.SetWet:
+                    return this.setWet(data.data);
+                case ReverbMessageCommandId.SetPreDelayMs:
+                    return this.setPreDelayMs(data.data);
                 case ReverbMessageCommandId.SetStereoSpreadMs:
                     return this.setStereoSpreadMs(data.data);
             }
@@ -72,7 +82,9 @@ export default class ReverbProcessor extends AudioWorkletProcessor {
                 sampleRate,
                 this.roomSize,
                 this.damping,
-                this.mix,
+                this.dry,
+                this.wet,
+                this.preDelayMs,
                 spreadMs
             );
             this.reverb[channelIndex] = inst;
@@ -96,10 +108,20 @@ export default class ReverbProcessor extends AudioWorkletProcessor {
         this.forEachInstance(r => r.set_damping(this.damping));
         sendMessageToAudioWorkletNode(this, "message", `Set damping of Reverb to ${this.damping}.`);
     }
-    private setMix(v: number) {
-        this.mix = v ?? this.mix;
-        this.forEachInstance(r => r.set_mix(this.mix));
-        sendMessageToAudioWorkletNode(this, "message", `Set mix of Reverb to ${this.mix}.`);
+    private setDry(v: number) {
+        this.dry = v ?? this.dry;
+        this.forEachInstance(r => r.set_dry(this.dry));
+        sendMessageToAudioWorkletNode(this, "message", `Set dry of Reverb to ${this.dry}.`);
+    }
+    private setWet(v: number) {
+        this.wet = v ?? this.wet;
+        this.forEachInstance(r => r.set_wet(this.wet));
+        sendMessageToAudioWorkletNode(this, "message", `Set wet of Reverb to ${this.wet}.`);
+    }
+    private setPreDelayMs(v: number) {
+        this.preDelayMs = v ?? this.preDelayMs;
+        this.forEachInstance(r => r.set_pre_delay_ms(this.preDelayMs));
+        sendMessageToAudioWorkletNode(this, "message", `Set preDelayMs of Reverb to ${this.preDelayMs}.`);
     }
     private setStereoSpreadMs(v: number) {
         this.stereoSpreadMs = v ?? this.stereoSpreadMs;
@@ -134,6 +156,11 @@ export default class ReverbProcessor extends AudioWorkletProcessor {
             return true;
         }
 
+        // Wet and dry are independent gains rather than a single crossfade,
+        // so only skip processing entirely when it would be a true no-op
+        // (no reverb contribution and the dry signal left at unity gain).
+        const isBypassed = (this.wet ?? 0) === 0 && (this.dry ?? 1) === 1;
+
         for (let ch = 0; ch < input.length; ch++) {
             const inChan = input[ch];
             const outChan = output[ch];
@@ -141,9 +168,8 @@ export default class ReverbProcessor extends AudioWorkletProcessor {
 
             this.ensureInstance(ch);
 
-            // If bypassed, just copy input to output but still ensure instances exist.
-            if ((this.mix ?? 0) === 0 || !this.reverb[ch]) {
-                outChan.set(inChan);
+            if (isBypassed || !this.reverb[ch]) {
+                 outChan.set(inChan);
                 continue;
             }
 

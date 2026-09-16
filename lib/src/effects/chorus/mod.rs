@@ -2,11 +2,9 @@ use wasm_bindgen::prelude::*;
 
 use crate::utilities::constants::DEFAULT_SAMPLE_RATE;
 
-const MIN_SAMPLE_RATE: f32 = 1.0;
-const MIN_DELAY_MS: f32 = 1.0;
-const MAX_DELAY_MS: f32 = 100.0;
-const MIN_DELAY_SAMPLES: f32 = 2.0;
-const MAX_FEEDBACK: f32 = 0.95;
+mod constants;
+
+use constants::*;
 
 #[wasm_bindgen]
 pub struct Chorus {
