@@ -15,6 +15,10 @@ import HighPassFilterProcessor from "./worklets/filters/HighPassFilter.worklet";
 import NotchFilterProcessor from "./worklets/filters/NotchFilter.worklet";
 import BandPassFilterProcessor from "./worklets/filters/BandPassFilter.worklet";
 
+import EqualizerProcessor from "./worklets/EqualizerProcessor.worklet";
+import SaturationProcessor from "./worklets/SaturationProcessor.worklet";
+import { MonoDelayProcessor, StereoDelayProcessor, PingPongDelayProcessor, AdvancedDelayProcessor } from "./worklets/delays/DelayEngineProcessor.worklet";
+
 registerProcessor("HardClipProcessor", HardClipProcessor);
 registerProcessor("SoftClipProcessor", SoftClipProcessor);
 registerProcessor("WhiteNoiseProcessor", WhiteNoiseProcessor);
@@ -27,3 +31,9 @@ registerProcessor("LowPassFilterProcessor", LowPassFilterProcessor);
 registerProcessor("HighPassFilterProcessor", HighPassFilterProcessor);
 registerProcessor("NotchFilterProcessor", NotchFilterProcessor);
 registerProcessor("BandPassFilterProcessor", BandPassFilterProcessor);
+registerProcessor("EqualizerProcessor", EqualizerProcessor);
+registerProcessor("SaturationProcessor", SaturationProcessor);
+registerProcessor("MonoDelayProcessor", MonoDelayProcessor);
+registerProcessor("StereoDelayProcessor", StereoDelayProcessor);
+registerProcessor("PingPongDelayProcessor", PingPongDelayProcessor);
+registerProcessor("AdvancedDelayProcessor", AdvancedDelayProcessor);

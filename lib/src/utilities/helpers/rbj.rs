@@ -160,3 +160,77 @@ pub fn rbj_bandpass(sample_rate: f32, cutoff: f32, resonance: f32) -> Biquad {
         Biquad::passthrough()
     }
 }
+
+/// Normalizes raw RBJ coefficients by a0, falling back to passthrough when unstable.
+fn normalize(b0: f32, b1: f32, b2: f32, a0: f32, a1: f32, a2: f32) -> Biquad {
+    if !a0.is_finite() || a0.abs() <= f32::EPSILON {
+        return Biquad::passthrough();
+    }
+
+    let biquad: Biquad = Biquad {
+        b0: b0 / a0,
+        b1: b1 / a0,
+        b2: b2 / a0,
+        a1: a1 / a0,
+        a2: a2 / a0
+    };
+
+    if biquad.is_finite() {
+        biquad
+    } else {
+        Biquad::passthrough()
+    }
+}
+
+/// Peaking EQ: boosts or cuts `gain_db` around `frequency`, with bandwidth set by `q`.
+pub fn rbj_peaking(sample_rate: f32, frequency: f32, q: f32, gain_db: f32) -> Biquad {
+    let a = 10.0_f32.powf(gain_db / 40.0);
+    let w0 = 2.0 * PI * frequency / sample_rate;
+    let (w0_sin, w0_cos) = (w0.sin(), w0.cos());
+    let alpha = w0_sin / (2.0 * q);
+
+    normalize(
+        1.0 + alpha * a,
+        -2.0 * w0_cos,
+        1.0 - alpha * a,
+        1.0 + alpha / a,
+        -2.0 * w0_cos,
+        1.0 - alpha / a,
+    )
+}
+
+/// Low shelf: boosts or cuts `gain_db` below `frequency`. `q` sets the slope of the transition.
+pub fn rbj_lowshelf(sample_rate: f32, frequency: f32, q: f32, gain_db: f32) -> Biquad {
+    let a = 10.0_f32.powf(gain_db / 40.0);
+    let w0 = 2.0 * PI * frequency / sample_rate;
+    let (w0_sin, w0_cos) = (w0.sin(), w0.cos());
+    let alpha = w0_sin / (2.0 * q);
+    let two_sqrt_a_alpha = 2.0 * a.sqrt() * alpha;
+
+    normalize(
+        a * ((a + 1.0) - (a - 1.0) * w0_cos + two_sqrt_a_alpha),
+        2.0 * a * ((a - 1.0) - (a + 1.0) * w0_cos),
+        a * ((a + 1.0) - (a - 1.0) * w0_cos - two_sqrt_a_alpha),
+        (a + 1.0) + (a - 1.0) * w0_cos + two_sqrt_a_alpha,
+        -2.0 * ((a - 1.0) + (a + 1.0) * w0_cos),
+        (a + 1.0) + (a - 1.0) * w0_cos - two_sqrt_a_alpha,
+    )
+}
+
+/// High shelf: boosts or cuts `gain_db` above `frequency`. `q` sets the slope of the transition.
+pub fn rbj_highshelf(sample_rate: f32, frequency: f32, q: f32, gain_db: f32) -> Biquad {
+    let a = 10.0_f32.powf(gain_db / 40.0);
+    let w0 = 2.0 * PI * frequency / sample_rate;
+    let (w0_sin, w0_cos) = (w0.sin(), w0.cos());
+    let alpha = w0_sin / (2.0 * q);
+    let two_sqrt_a_alpha = 2.0 * a.sqrt() * alpha;
+
+    normalize(
+        a * ((a + 1.0) + (a - 1.0) * w0_cos + two_sqrt_a_alpha),
+        -2.0 * a * ((a - 1.0) + (a + 1.0) * w0_cos),
+        a * ((a + 1.0) + (a - 1.0) * w0_cos - two_sqrt_a_alpha),
+        (a + 1.0) - (a - 1.0) * w0_cos + two_sqrt_a_alpha,
+        2.0 * ((a - 1.0) - (a + 1.0) * w0_cos),
+        (a + 1.0) - (a - 1.0) * w0_cos - two_sqrt_a_alpha,
+    )
+}

@@ -15,3 +15,7 @@ pub mod delay;
 pub mod flanger;
 pub mod phaser;
 pub mod reverb;
+
+pub mod advanced_delay;
+pub mod equalizer;
+pub mod saturation;
